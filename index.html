@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Project: NTU_LEGACY | 台大實境解謎</title>
+    <title>Project: NTU_ARCHIVE | 台大校園實境解謎</title>
     <!-- 設定網頁 Favicon (瀏覽器分頁圖示) -->
     <link rel="icon" type="image/png" href="images/logo.png">
     
@@ -207,10 +207,10 @@
         const STAGES = {
             'gate': {
                 id: 'gate', name: '台大校門', code: '2',
-                lat: 25.017400, lon: 121.533900, 
+                lat: 25.017014, lon: 121.533854,
                 rescueCode: 'NTU1928', // 專屬救援碼
                 hintTitle: '知識的入口',
-                hintDesc: '所有旅程的起點，昔日的帝國大學門戶。',
+                hintDesc: '大學生涯的起點，昔日的帝國大學門戶。',
                 hintImage: 'images/gate.jpg', 
                 icon: 'fa-torii-gate', title: '時光刻度',
                 desc: '請轉動圓盤，依發生年代將校史事件排序。',
@@ -218,7 +218,7 @@
             },
             'palm': {
                 id: 'palm', name: '椰林大道', code: '2', 
-                lat: 25.018500, lon: 121.539000, 
+                lat: 25.017278, lon: 121.534977, 
                 rescueCode: 'PALM96', 
                 hintTitle: '熱帶的守望者',
                 hintDesc: '筆直的大道，兩旁高聳的植物見證了無數學子的來去。',
@@ -229,18 +229,18 @@
             },
             'bell': {
                 id: 'bell', name: '傅鐘', code: '2',
-                lat: 25.018000, lon: 121.538500, 
+                lat: 25.017246, lon: 121.536768,
                 rescueCode: 'RING21',
                 hintTitle: '時間的警鐘',
-                hintDesc: '為了紀念一位偉大的校長，這裡的鐘聲總是敲響21下。',
+                hintDesc: '為了紀念一位偉大的校長，這裡的鐘聲總是依循他的名言敲響。',
                 hintImage: 'images/bell.jpg', 
                 icon: 'fa-bell', title: '聲速奧秘',
-                desc: '分辨真假傅鐘的聲響，計算音速與時間差。',
+                desc: '期末考這天，奎哥第一節課快遲到，學校規定：只有當傅鐘「最後一下敲完」那一刻才算遲到。他在路口時聽到鐘聲，卻發現有人惡作劇放了「假傅鐘」喇叭，播放幾乎一樣的鐘聲來混淆同學。請你協助他分辨真假傅鐘的聲響，計算音速與時間差。',
                 difficultyLabel: '物理數學', type: 'physics'
             },
             'gym': {
                 id: 'gym', name: '舊體育館', code: 'D',
-                lat: 25.022200, lon: 121.536900, 
+                lat: 25.020000, lon: 121.536569,
                 rescueCode: 'OLDGYM7',
                 hintTitle: '古典競技場',
                 hintDesc: '校園中最古老的體育建築，門口的羅馬柱是其特徵。',
@@ -252,7 +252,7 @@
             'lake': {
                 id: 'lake', name: '醉月湖', code: 'L',
                 rescueCode: 'MOON33',
-                lat: 25.021000, lon: 121.537000, 
+                lat: 25.020571, lon: 121.537626,
                 hintTitle: '詩人的倒影',
                 hintDesc: '校園中的一抹碧波，湖心亭是其標誌。',
                 hintImage: 'images/lake.jpg', 
@@ -263,34 +263,34 @@
             'library': {
                 id: 'library', name: '總圖書館', code: 'C',
                 rescueCode: 'READ88',
-                lat: 25.017340, lon: 121.540560, 
+                lat: 25.017392, lon: 121.540527,
                 hintTitle: '知識的堡壘',
                 hintDesc: '校園的幾何中心，保存著百萬藏書的宏偉建築。',
                 hintImage: 'images/library.jpg', 
                 icon: 'fa-book', title: '三角測量',
-                desc: '利用俯角觀測數據，計算建築物的距離與高度。',
+                desc: '奎哥從台大總圖書館樓頂觀測校園，請利用俯角觀測數據，計算建築物的距離與高度。',
                 difficultyLabel: '數學幾何', type: 'math'
             },
             'waffle': {
                 id: 'waffle', name: '小木屋', code: '0', 
                 rescueCode: 'YUMMY00',
-                lat: 25.019500, lon: 121.540800, 
+                lat: 25.015684, lon: 121.537550,
                 hintTitle: '甜蜜的角落',
                 hintDesc: '排隊人潮總是絡績不絕，空氣中飄散著鬆餅的香氣。',
                 hintImage: 'images/waffle.jpg', 
                 icon: 'fa-utensils', title: '音律食材',
-                desc: '美味秘密藏在旋律裡。聆聽音符辨識音名，拼出英文食材單字。',
+                desc: '美味秘密藏在旋律裡。聆聽音符辨識「音名」，拼出英文食材單字。',
                 difficultyLabel: '音樂聽寫', type: 'music'
             },
             'subway': {
                 id: 'subway', name: '公館捷運', code: 'E',
                 rescueCode: 'EXIT3',
-                lat: 25.015500, lon: 121.534000, 
+                lat: 25.014711, lon: 121.534687,
                 hintTitle: '地下的脈動',
                 hintDesc: '校園旁的交通樞紐，四通八達的捷運路網。',
                 hintImage: 'images/subway.jpg', 
                 icon: 'fa-train-subway', title: '捷運租屋',
-                desc: '奎哥想在學校附近租屋。請協助他篩選符合通勤條件的捷運站。',
+                desc: '奎哥就讀「台灣大學」他想在學校附近租屋。請協助他篩選符合通勤條件的捷運站。',
                 difficultyLabel: '生活地理', type: 'checkbox'
             }
         };
@@ -783,7 +783,7 @@
             },
 
             getBellPuzzle() {
-                return `<div class="space-y-4"><input type="number" id="bell-q1" placeholder="Q1 音速 v" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"><input type="number" id="bell-q2" placeholder="Q2 假喇叭提早" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"><input type="number" id="bell-q3" placeholder="Q3 遲到倒數" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"></div><button onclick="app.checkBellAns()" class="w-full btn-neon py-3 mt-4">提交驗證</button>`;
+                return `<div class="space-y-4"><input type="number" id="bell-q1" placeholder="Q1 音速 v" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"><input type="number" id="bell-q2" placeholder="Q2 假喇叭提早多久播放" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"><input type="number" id="bell-q3" placeholder="Q3 距離遲到還有多少時間" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"></div><button onclick="app.checkBellAns()" class="w-full btn-neon py-3 mt-4">提交驗證</button>`;
             },
             checkBellAns() {
                 let c = 0;
@@ -794,7 +794,7 @@
             },
 
             getLibraryPuzzle() {
-                return `<div class="space-y-4"><input type="number" id="lib-q1" placeholder="Q1 AB距離" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"><input type="number" id="lib-q2" placeholder="Q2 樓高" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"></div><button onclick="app.checkLibraryAns()" class="w-full btn-neon py-3 mt-4">提交驗證</button>`;
+                return `<div class="space-y-4"><input type="number" id="lib-q1" placeholder="Q1 AB距離多遠" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"><input type="number" id="lib-q2" placeholder="Q2 奎哥站在多高的位置" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"></div><button onclick="app.checkLibraryAns()" class="w-full btn-neon py-3 mt-4">提交驗證</button>`;
             },
             initLibraryEvents() {},
             checkLibraryAns() {
@@ -891,7 +891,7 @@
                                 <div class="bg-emerald-500/10 border-2 border-emerald-500 p-8 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                                     <div class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fa-solid fa-check text-3xl text-ntu-bg"></i></div>
                                     <h2 class="text-3xl font-bold text-white mb-4 tracking-tighter">ACCESS GRANTED</h2>
-                                    <p class="text-slate-300 leading-relaxed">任務圓滿完成！<br>請截圖此畫面回傳工作人員領取獎勵。</p>
+                                    <p class="text-slate-300 leading-relaxed">恭喜你任務圓滿完成！<br>歡迎截圖此畫面回傳工作人員，也祝你如願考取理想校系。</p>
                                     <div class="mt-8 pt-6 border-t border-emerald-500/30 text-[10px] text-emerald-500 font-mono">HASH: ${Date.now().toString(16).toUpperCase()}</div>
                                 </div>
                             </div>`;
