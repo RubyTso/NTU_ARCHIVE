@@ -3,22 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- [關鍵修正] 允許執行 inline script 和 data URI 圖片 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
-    
     <title>Project: NTU_LEGACY | 台大實境解謎</title>
     <link rel="icon" type="image/png" href="images/logo.png">
+
+    <!-- [除錯工具] 如果有錯誤，會在頁面上方顯示紅框 -->
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            var errorBox = document.createElement('div');
+            errorBox.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:red;color:white;z-index:99999;padding:10px;font-family:monospace;font-size:14px;word-break:break-all;';
+            errorBox.innerHTML = '<strong>SYSTEM ERROR:</strong> ' + message + ' (Line: ' + lineno + ')';
+            document.body.appendChild(errorBox);
+            return false;
+        };
+    </script>
     
     <!-- 引入字體與圖標 -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- 基礎設定 (Reset & Variables) --- */
+        /* --- 核心變數 --- */
         :root {
             --bg-color: #0b1121;
             --card-bg: #151e32;
-            --border-color: #1e293b;
+            --border-color: #334155;
             --text-main: #e2e8f0;
             --text-sub: #94a3b8;
             --accent-cyan: #38bdf8;
@@ -34,16 +42,14 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             font-family: 'Noto Sans TC', sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             overflow: hidden;
             touch-action: manipulation;
         }
 
-        /* --- 工具類別 (Utilities) --- */
+        /* --- 工具類別 --- */
         .mono { font-family: 'JetBrains Mono', monospace; }
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
@@ -70,50 +76,45 @@
             background: rgba(11, 17, 33, 0.95); backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 16px; z-index: 50; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 0 16px; z-index: 50; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .header-logo { display: flex; align-items: center; gap: 8px; font-weight: bold; }
         .header-logo span:first-child { color: var(--accent-pink); font-size: 1.2rem; }
         .header-controls { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; }
-        .team-badge { background: rgba(217, 70, 239, 0.1); color: var(--accent-pink); padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .team-badge { background: rgba(217, 70, 239, 0.1); color: var(--accent-pink); padding: 4px 8px; border-radius: 4px; font-weight: bold; font-family: 'JetBrains Mono', monospace;}
         .reset-btn { background: none; border: none; color: var(--danger); cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.8rem; }
 
         /* --- Main Content --- */
         main {
             flex: 1; width: 100%; max-width: 480px; margin: 0 auto;
-            padding: 80px 16px 100px 16px; /* Top padding for header, Bottom for nav */
+            padding: 80px 16px 120px 16px;
             overflow-y: auto; position: relative; z-index: 10;
         }
 
         /* --- Navigation --- */
         nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; height: 70px;
             background: var(--bg-color); border-top: 1px solid var(--border-color);
             display: grid; grid-template-columns: 1fr 1fr 1fr;
-            z-index: 50; max-width: 480px; left: 50%; transform: translateX(-50%);
+            z-index: 50; box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
         nav button {
             background: none; border: none; color: var(--text-sub);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 4px; font-size: 0.7rem; cursor: pointer; transition: color 0.3s;
         }
-        nav button i { font-size: 1.2rem; }
-        nav button.active { color: var(--accent-pink); }
+        nav button i { font-size: 1.4rem; margin-bottom: 2px; }
+        nav button.active { color: var(--accent-pink); text-shadow: 0 0 10px rgba(217, 70, 239, 0.3); }
 
-        /* --- Cards & Containers --- */
+        /* --- UI Components --- */
         .card {
             background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 12px; padding: 20px; margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden;
         }
-        .section-title {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 16px; border-left: 4px solid var(--accent-pink); padding-left: 12px;
-        }
-        .section-title h2 { margin: 0; font-size: 1.2rem; color: white; }
-        .section-info { font-size: 0.75rem; color: var(--text-sub); }
-
-        /* --- Neon Button --- */
+        
         .btn-neon {
             width: 100%; padding: 14px;
             background: linear-gradient(90deg, #d946ef 0%, #7c3aed 100%);
@@ -124,68 +125,36 @@
             transition: transform 0.2s, box-shadow 0.2s;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn-neon:active { transform: scale(0.98); }
-        
+        .btn-neon:active { transform: scale(0.98); box-shadow: 0 0 5px rgba(217, 70, 239, 0.4); }
+
         .btn-secondary {
             width: 100%; padding: 12px;
-            background: var(--bg-color); border: 1px solid var(--border-color);
+            background: transparent; border: 1px solid var(--border-color);
             color: var(--text-sub); border-radius: 8px; font-weight: bold;
             cursor: pointer; transition: all 0.2s;
         }
+        .btn-secondary:hover { border-color: var(--text-sub); color: white; }
 
-        /* --- Inputs --- */
         .input-field {
-            width: 100%; background: transparent; border: none;
+            width: 100%; background: rgba(0,0,0,0.2); border: none;
             border-bottom: 2px solid var(--border-color);
-            color: var(--accent-pink); font-size: 1.2rem; text-align: center;
+            color: var(--accent-pink); font-size: 1.5rem; text-align: center;
             padding: 10px; outline: none; font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase; letter-spacing: 2px;
+            text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
         }
         .input-field:focus { border-bottom-color: var(--accent-pink); background: rgba(217, 70, 239, 0.05); }
 
-        /* --- Grid Layouts --- */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .section-title {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; border-left: 4px solid var(--accent-pink); padding-left: 12px;
+        }
+        .section-title h2 { margin: 0; font-size: 1.2rem; color: white; }
 
-        /* --- Specific Puzzles --- */
-        /* Dial */
-        .dial-wrapper {
-            position: relative; width: 280px; height: 280px; margin: 20px auto;
-            border-radius: 50%; background: linear-gradient(145deg, #1a233a, #0f1623);
-            border: 12px solid var(--border-color);
-            box-shadow: 5px 5px 15px #070b15, -5px -5px 15px #1f2b45, inset 0 0 20px #000;
-            user-select: none;
+        .img-container {
+            width: 100%; height: 200px; border-radius: 8px; overflow: hidden;
+            border: 1px solid var(--border-color); margin-bottom: 16px; background: #000;
         }
-        .dial-knob {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 170px; height: 170px; border-radius: 50%;
-            background: var(--card-bg); border: 1px solid #334155;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 10; cursor: grab;
-        }
-        .dial-knob:active { cursor: grabbing; border-color: var(--accent-pink); }
-        .dial-pointer {
-            position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0;
-            border-left: 12px solid transparent; border-right: 12px solid transparent;
-            border-bottom: 20px solid var(--accent-yellow);
-        }
-        .dial-letter {
-            position: absolute; width: 30px; height: 30px;
-            text-align: center; line-height: 30px; color: var(--text-sub);
-            font-weight: bold; font-family: monospace; font-size: 1.2rem;
-            pointer-events: none; transform-origin: center center;
-        }
-
-        /* Word Grid */
-        .word-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; font-family: monospace; }
-        .word-cell {
-            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-            background: var(--border-color); border: 1px solid #334155; color: var(--text-sub);
-            font-weight: bold; cursor: pointer;
-        }
-        .word-cell.marked { background: var(--accent-cyan); color: var(--bg-color); }
+        .img-cover { width: 100%; height: 100%; object-fit: cover; }
 
         /* Toast */
         #toast {
@@ -193,36 +162,61 @@
             background: #1e293b; border: 1px solid var(--accent-pink); color: white;
             padding: 12px 24px; border-radius: 8px; z-index: 100;
             opacity: 0; transition: opacity 0.3s; pointer-events: none;
-            display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         #toast.show { opacity: 1; }
 
-        /* Intro Page */
-        .intro-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%; text-align: center; }
-        .logo-box { 
-            width: 120px; height: 120px; border-radius: 50%; overflow: hidden; 
-            border: 4px solid rgba(217, 70, 239, 0.5); 
-            box-shadow: 0 0 20px rgba(217, 70, 239, 0.3); margin-bottom: 20px;
+        /* Grid Helpers */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+        /* Dial Puzzle Specific */
+        .dial-wrapper {
+            position: relative; width: 260px; height: 260px; margin: 20px auto;
+            border-radius: 50%; background: linear-gradient(145deg, #1a233a, #0f1623);
+            border: 10px solid var(--border-color);
+            box-shadow: inset 0 0 20px #000;
+            user-select: none;
         }
-        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
-        .title-main { font-size: 2rem; font-weight: bold; color: var(--accent-pink); letter-spacing: 0.2em; text-shadow: 0 0 10px rgba(217, 70, 239, 0.5); margin-bottom: 40px; }
+        .dial-track {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 170px; height: 170px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.05); pointer-events: none;
+        }
+        .dial-knob {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 160px; height: 160px; border-radius: 50%;
+            background: var(--card-bg); border: 1px solid #334155;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; cursor: grab;
+        }
+        .dial-knob:active { cursor: grabbing; border-color: var(--accent-pink); }
+        .dial-pointer {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-bottom: 18px solid var(--accent-yellow);
+        }
+        .dial-letter {
+            position: absolute; width: 30px; height: 30px;
+            text-align: center; line-height: 30px; color: var(--text-sub);
+            font-weight: bold; font-family: 'JetBrains Mono', monospace;
+            pointer-events: none; transform-origin: center center;
+        }
 
-        /* Helpers */
-        .text-center { text-align: center; }
-        .text-accent { color: var(--accent-pink); }
-        .text-sub { color: var(--text-sub); font-size: 0.85rem; }
-        .w-full { width: 100%; }
-        .mb-2 { margin-bottom: 8px; }
-        .mb-4 { margin-bottom: 16px; }
-        .mt-2 { margin-top: 8px; }
-        .mt-4 { margin-top: 16px; }
-        .relative { position: relative; }
-        .img-container { width: 100%; height: 200px; overflow: hidden; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 16px; }
-        .img-cover { width: 100%; height: 100%; object-fit: cover; }
-
-        /* Checkbox Override */
-        input[type="checkbox"] { width: 1.2rem; height: 1.2rem; margin-right: 8px; accent-color: var(--accent-pink); }
-        .checkbox-label { display: flex; align-items: center; padding: 10px; background: var(--border-color); border-radius: 6px; cursor: pointer; }
+        /* Checkbox Custom */
+        .checkbox-group label {
+            display: flex; align-items: center; padding: 12px;
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border-color);
+            border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;
+        }
+        .checkbox-group label:hover { border-color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
+        .checkbox-group input { margin-right: 12px; width: 18px; height: 18px; accent-color: var(--accent-cyan); }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
     </style>
 </head>
 <body>
@@ -234,7 +228,7 @@
     <header>
         <div class="header-logo">
             <span>&gt;_</span>
-            <span class="mono" style="color:white; letter-spacing: 2px;">NTU_SYSTEM</span>
+            <span class="mono" style="color:#d946ef; letter-spacing: 2px;">NTU_SYSTEM</span>
         </div>
         <div class="header-controls">
             <div id="team-display" class="team-badge"></div>
@@ -266,7 +260,9 @@
     </div>
 
     <script>
+        // 設定
         const ADMIN_PASS = '8888';
+        const FINAL_ANSWER_HASH = "REVMQ18yMDIy"; 
 
         const STAGES = {
             'gate': {
@@ -362,8 +358,6 @@
             8: ['palm', 'bell', 'gym', 'lake', 'library', 'waffle', 'subway', 'gate']
         };
 
-        const FINAL_ANSWER_HASH = "REVMQ18yMDIy"; 
-
         const app = {
             state: {
                 teamId: null,
@@ -381,115 +375,70 @@
                     this.loadProgress(); 
                     this.render(); 
                 } catch(e) {
-                    console.error(e);
-                    alert("初始化失敗: " + e.message);
+                    alert("Init Error: " + e);
                 }
             },
 
-            initAudio() {
-                if(!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if(this.audioCtx.state === 'suspended') this.audioCtx.resume();
-            },
-
-            playMelody(notes) {
-                this.initAudio();
-                const now = this.audioCtx.currentTime;
-                notes.forEach((n, i) => {
-                    if(!this.noteFreqs[n]) return;
-                    const osc = this.audioCtx.createOscillator();
-                    const gain = this.audioCtx.createGain();
-                    const t = now + i * 0.6;
-                    osc.type = 'triangle';
-                    osc.frequency.value = this.noteFreqs[n];
-                    osc.connect(gain);
-                    gain.connect(this.audioCtx.destination);
-                    gain.gain.setValueAtTime(0, t);
-                    gain.gain.linearRampToValueAtTime(0.3, t + 0.05);
-                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-                    osc.start(t);
-                    osc.stop(t + 0.5);
-                });
-            },
-
+            // 儲存與讀取
             loadProgress() {
                 const team = localStorage.getItem('ntu_puzzle_team');
                 const c = localStorage.getItem('ntu_puzzle_completed');
                 const a = localStorage.getItem('ntu_puzzle_arrived');
-                const s = localStorage.getItem('ntu_puzzle_scores');
-                const t = localStorage.getItem('ntu_puzzle_start_times');
                 
                 if (team) {
                     this.state.teamId = parseInt(team);
                     if (c) this.state.completedStages = JSON.parse(c);
                     if (a) this.state.arrivedStages = JSON.parse(a);
-                    if (s) this.state.stageScores = JSON.parse(s);
-                    if (t) this.state.stageStartTimes = JSON.parse(t);
                     this.state.currentView = 'mission';
                 }
             },
-
             saveProgress() {
                 if(this.state.teamId) localStorage.setItem('ntu_puzzle_team', this.state.teamId);
                 localStorage.setItem('ntu_puzzle_completed', JSON.stringify(this.state.completedStages));
                 localStorage.setItem('ntu_puzzle_arrived', JSON.stringify(this.state.arrivedStages));
-                localStorage.setItem('ntu_puzzle_scores', JSON.stringify(this.state.stageScores));
-                localStorage.setItem('ntu_puzzle_start_times', JSON.stringify(this.state.stageStartTimes));
                 this.updateUI(); 
             },
             
             updateUI() {
                 if(this.state.teamId) {
                     const el = document.getElementById('team-display');
-                    if(el) el.textContent = `小隊 ${this.state.teamId}`;
+                    if(el) el.textContent = '小隊 ' + this.state.teamId;
                 }
                 
                 ['mission', 'clues', 'final'].forEach(view => {
-                    const btn = document.getElementById(`nav-${view}`);
+                    const btn = document.getElementById('nav-' + view);
                     if(btn) {
-                        if(view === this.state.currentView) btn.classList.add('active');
-                        else btn.classList.remove('active');
+                        if(view === this.state.currentView) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
                     }
                 });
             },
 
-            resetGame() {
-                if(confirm('確定要重置所有進度嗎？(包含小隊設定)')) {
-                    localStorage.clear();
-                    location.reload();
-                }
-            },
-
-            setTeam(id) {
-                this.state.teamId = id;
-                this.saveProgress();
-                this.navigate('mission');
-            },
-
+            // 導航
             navigate(view) {
                 this.state.currentView = view;
                 this.state.gateLockIndex = 0; 
                 this.state.gateLockSequence = [];
                 this.render();
             },
-
-            toast(msg) {
-                const t = document.getElementById('toast');
-                if(!t) return;
-                document.getElementById('toast-msg').textContent = msg;
-                t.classList.add('show');
-                setTimeout(() => t.classList.remove('show'), 3000);
+            
+            setTeam(id) {
+                this.state.teamId = id;
+                this.saveProgress();
+                this.navigate('mission');
             },
 
-            requestAdminSkip(id) {
-                const code = prompt("請輸入救援密碼 (由管理員提供)：");
-                if (code === ADMIN_PASS) {
-                    this.forceArrive(id);
-                    this.toast("已強制解鎖位置");
-                } else if (code !== null) {
-                    alert("密碼錯誤！");
+            resetGame() {
+                if(confirm('確定要重置所有進度嗎？')) {
+                    localStorage.clear();
+                    location.reload();
                 }
             },
 
+            // 核心渲染
             render() {
                 const container = document.getElementById('app-container');
                 if(!container) return;
@@ -507,27 +456,26 @@
                 else if(this.state.currentView === 'final') this.renderFinal(container);
             },
 
+            // Intro Page
             renderIntro(container) {
-                let buttonsHtml = '';
+                let buttons = '';
                 for(let i=1; i<=8; i++) {
-                    buttonsHtml += `<button onclick="app.setTeam(${i})" class="btn-secondary" style="margin-bottom:10px;">小隊 0${i}</button>`;
+                    buttons += '<button onclick="app.setTeam('+i+')" class="btn-secondary" style="margin-bottom:10px;">小隊 0'+i+'</button>';
                 }
-
                 container.innerHTML = `
                     <div class="intro-container fade-in">
                         <div class="logo-box">
                             <img src="images/logo.png" onerror="this.src='https://via.placeholder.com/150?text=LOGO'">
                         </div>
-                        
                         <div class="title-main">NTU ARCHIVE</div>
-
                         <div class="w-full max-w-xs space-y-4">
-                            <p class="text-sub mb-6">請選擇小隊編號以存取資料庫</p>
-                            <div class="grid-2" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">${buttonsHtml}</div>
+                            <p class="text-sub mb-6">請選擇小隊編號</p>
+                            <div class="grid-2">${buttons}</div>
                         </div>
                     </div>`;
             },
 
+            // Mission Page
             renderMission(container) {
                 const route = TEAM_ROUTES[this.state.teamId];
                 const currentIndex = this.state.completedStages.length;
@@ -535,86 +483,64 @@
                 if (currentIndex >= route.length) {
                     container.innerHTML = `
                         <div class="intro-container fade-in">
-                            <div style="width:80px; height:80px; border-radius:50%; border:2px solid var(--accent-yellow); display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
-                                <i class="fa-solid fa-flag-checkered text-4xl" style="color:var(--accent-yellow)"></i>
-                            </div>
-                            <h2 style="font-size:1.5rem; margin-bottom:10px;">任務全數完成</h2>
-                            <p class="text-sub mb-8">所有資料碎片已收集完畢。<br>請前往終端解碼以完成任務。</p>
-                            <button onclick="app.navigate('final')" class="btn-neon" style="width:auto; padding: 15px 40px;">
-                                <i class="fa-solid fa-terminal"></i> 前往終端機
-                            </button>
-                        </div>
-                    `;
+                            <h2 style="font-size:1.5rem; margin-bottom:20px; color:white;">任務全數完成</h2>
+                            <button onclick="app.navigate('final')" class="btn-neon">前往終端機</button>
+                        </div>`;
                     return;
                 }
 
-                const currentStageId = route[currentIndex];
-                const s = STAGES[currentStageId];
-                const isArrived = this.state.arrivedStages.includes(currentStageId);
-
+                const s = STAGES[route[currentIndex]];
+                const isArrived = this.state.arrivedStages.includes(s.id);
+                
                 let content = `
                     <div class="section-title">
                         <div>
-                            <div class="mono" style="color:var(--accent-pink); font-size:0.7rem;">CURRENT_MISSION</div>
-                            <h2>任務 ${currentIndex + 1} <span style="font-size:0.8rem; color:var(--text-sub)">/ ${route.length}</span></h2>
+                            <div class="mono" style="color:#d946ef; font-size:0.7rem;">CURRENT_MISSION</div>
+                            <h2>任務 ${currentIndex + 1} / ${route.length}</h2>
                         </div>
-                        <div style="font-size:0.7rem; color:var(--text-sub); border:1px solid var(--border-color); padding:4px 8px; border-radius:4px; background:var(--bg-color);">
-                            ${isArrived ? `<i class="fa-solid fa-location-dot" style="color:var(--accent-pink)"></i> ${s.name}` : '<i class="fa-solid fa-lock"></i> 地點加密'}
+                        <div style="font-size:0.7rem; color:#94a3b8; border:1px solid #334155; padding:4px 8px; border-radius:4px;">
+                            ${isArrived ? s.name : '地點加密'}
                         </div>
-                    </div>
-                `;
+                    </div>`;
 
                 if (!isArrived) {
                     content += `
                         <div class="card fade-in">
                             <div class="mb-4">
-                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                                    <i class="fa-solid fa-map-pin" style="color:var(--danger)"></i>
-                                    <h3 style="margin:0; font-size:1.1rem;">${s.hintTitle}</h3>
-                                </div>
+                                <h3 style="margin:0 0 10px 0; font-size:1.1rem; color:white;">${s.hintTitle}</h3>
                                 <div class="img-container">
-                                    <img src="${s.hintImage}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Not+Found'" class="img-cover">
+                                    <img src="${s.hintImage}" onerror="this.src='https://via.placeholder.com/400x200'" class="img-cover">
                                 </div>
-                                <p style="color:var(--text-sub); font-size:0.9rem; line-height:1.6; border-left:2px solid var(--border-color); padding-left:12px;">${s.hintDesc}</p>
+                                <p style="color:#94a3b8; font-size:0.9rem;">${s.hintDesc}</p>
                             </div>
-                            <div style="border-top:1px solid var(--border-color); padding-top:20px; text-align:center;">
-                                <button onclick="app.verifyLocation('${s.id}')" class="btn-neon">
-                                    <i class="fa-solid fa-satellite-dish"></i> 掃描目前位置
-                                </button>
-                                <div id="check-status" class="mono" style="color:var(--accent-yellow); font-size:0.7rem; margin-top:10px; min-height:1.5rem;"></div>
-                                <div class="mt-2"><button onclick="app.requestAdminSkip('${s.id}')" style="background:none; border:none; color:var(--text-sub); font-size:0.7rem; cursor:pointer;" class="mono"><i class="fa-solid fa-triangle-exclamation"></i> 定位異常？(輸入救援碼)</button></div>
+                            <div style="border-top:1px solid #334155; padding-top:20px; text-align:center;">
+                                <button onclick="app.verifyLocation('${s.id}')" class="btn-neon">掃描目前位置</button>
+                                <div id="check-status" class="mono" style="color:#fbbf24; font-size:0.7rem; margin-top:10px;"></div>
+                                <div class="mt-2"><button onclick="app.requestAdminSkip('${s.id}')" style="background:none; border:none; color:#94a3b8; cursor:pointer;" class="mono">定位異常？(輸入救援碼)</button></div>
                             </div>
                         </div>`;
                 } else {
-                    let mediaHtml = '';
-                    if (s.image) mediaHtml += `<div class="img-container"><img src="${s.image}" onerror="this.style.display='none'" class="img-cover"></div>`;
-
                     let puzzleHtml = '';
-                    switch (s.id) {
-                        case 'gym': puzzleHtml = this.getGymPuzzle(); break;
-                        case 'subway': puzzleHtml = this.getSubwayPuzzle(); break;
-                        case 'lake': puzzleHtml = this.getLakePuzzle(); break;
-                        case 'library': puzzleHtml = this.getLibraryPuzzle(); break;
-                        case 'waffle': puzzleHtml = this.getWafflePuzzle(); break;
-                        case 'gate': puzzleHtml = this.getGatePuzzle(); break;
-                        case 'bell': puzzleHtml = this.getBellPuzzle(); break;
-                        case 'palm': puzzleHtml = this.getPalmPuzzle(); break;
-                    }
+                    if (s.id === 'gym') puzzleHtml = this.getGymPuzzle();
+                    else if (s.id === 'subway') puzzleHtml = this.getSubwayPuzzle();
+                    else if (s.id === 'lake') puzzleHtml = this.getLakePuzzle();
+                    else if (s.id === 'library') puzzleHtml = this.getLibraryPuzzle();
+                    else if (s.id === 'waffle') puzzleHtml = this.getWafflePuzzle();
+                    else if (s.id === 'gate') puzzleHtml = this.getGatePuzzle();
+                    else if (s.id === 'bell') puzzleHtml = this.getBellPuzzle();
+                    else if (s.id === 'palm') puzzleHtml = this.getPalmPuzzle();
+
                     content += `
                         <div class="card fade-in">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <div style="width:32px; height:32px; background:var(--bg-color); border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--border-color); color:var(--accent-pink);"><i class="fa-solid ${s.icon}"></i></div>
-                                    <span style="font-weight:bold; font-size:1.1rem;">${s.name}</span>
-                                </div>
-                                <span class="mono" style="font-size:0.6rem; padding:2px 6px; border-radius:4px; background:var(--bg-color); color:var(--text-sub); border:1px solid var(--border-color);">${s.difficultyLabel}</span>
+                            <div class="img-container">
+                                <img src="${s.image || s.hintImage}" class="img-cover">
                             </div>
-                            <div style="color:var(--text-sub); font-size:0.9rem; margin-bottom:20px; line-height:1.6;">${s.desc}</div>
-                            ${mediaHtml}
+                            <div style="color:#94a3b8; font-size:0.9rem; margin-bottom:20px;">${s.desc}</div>
                             ${puzzleHtml}
                         </div>`;
                 }
                 container.innerHTML = content;
+
                 if(isArrived) {
                     if(s.id === 'library') this.initLibraryEvents(); 
                     if(s.id === 'waffle') this.initWaffleEvents();
@@ -623,188 +549,98 @@
                 }
             },
 
+            // GPS
             verifyLocation(id) {
                 const s = STAGES[id];
                 const stat = document.getElementById('check-status');
-                stat.textContent = "正在連線衛星進行三角定位...";
-                stat.style.color = "var(--accent-cyan)";
+                stat.textContent = "正在定位...";
 
-                if (!navigator.geolocation) { stat.textContent = "錯誤：瀏覽器不支援 GPS"; return; }
+                if (!navigator.geolocation) { stat.textContent = "不支援 GPS"; return; }
                 navigator.geolocation.getCurrentPosition(
                     (p) => {
                         const dist = this.getDist(p.coords.latitude, p.coords.longitude, s.lat, s.lon) * 1000;
                         if (dist < 100) {
-                            stat.textContent = "訊號捕獲成功！正在解密...";
-                            stat.style.color = "var(--success)";
-                            setTimeout(() => this.forceArrive(id), 1500);
+                            stat.textContent = "成功！";
+                            setTimeout(() => this.forceArrive(id), 1000);
                         } else {
-                            stat.textContent = `距離目標尚有 ${Math.round(dist)} 公尺`;
-                            stat.style.color = "var(--danger)";
-                            this.toast('位置太遠，請移動至目標地點');
+                            stat.textContent = "距離過遠 (" + Math.round(dist) + "m)";
+                            this.toast('位置太遠');
                         }
                     },
-                    (e) => { stat.textContent = "GPS 讀取失敗 (" + e.message + ")"; stat.style.color = "var(--danger)"; },
-                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                    (e) => { stat.textContent = "GPS 失敗"; },
+                    { enableHighAccuracy: true }
                 );
+            },
+            
+            requestAdminSkip(id) {
+                const code = prompt("輸入救援碼：");
+                if (code === ADMIN_PASS) {
+                    this.forceArrive(id);
+                } else if(code !== null) {
+                    alert("密碼錯誤");
+                }
             },
 
             forceArrive(id) {
                 if (!this.state.arrivedStages.includes(id)) {
                     this.state.arrivedStages.push(id);
-                    if (!this.state.stageStartTimes[id]) this.state.stageStartTimes[id] = Date.now();
                     this.saveProgress();
-                    this.toast('區域解鎖成功');
                 }
                 this.render();
             },
 
-            /* --- PUZZLES --- */
-            getPalmPuzzle() {
-                return `
-                    <div class="card mb-4" style="background:var(--bg-color);">
-                        <div class="text-sub mb-4" style="border-left:2px solid var(--border-color); padding-left:12px;">
-                            <p style="color:white; margin-bottom:8px; font-weight:bold;">光譜參數：</p>
-                            <ul style="padding-left:20px; list-style-type:disc; font-size:0.8rem; line-height:1.5;">
-                                <li>R (紅): <span style="color:var(--accent-pink)">椰林大道兩側各96顆椰子樹，共幾棵？</span></li>
-                                <li>G (綠): <span style="color:var(--accent-pink)">第二個完全數 (Perfect Number)</span></li>
-                                <li>B (藍): <span style="color:var(--accent-pink)">氧原子 (O) 的原子序平方</span></li>
-                            </ul>
-                        </div>
-                        <div id="color-preview" style="width:100%; height:60px; border-radius:8px; margin-bottom:16px; border:1px solid var(--border-color); transition:background-color 0.3s; background-color:black;"></div>
-                        <div style="display:flex; flex-direction:column; gap:12px;">
-                            <div><div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px; font-weight:bold;"><span style="color:#ef4444;">RED</span><span id="val-r" class="mono" style="color:#ef4444;">0</span></div><input type="range" id="range-r" min="0" max="255" value="0" style="width:100%;"></div>
-                            <div><div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px; font-weight:bold;"><span style="color:#10b981;">GREEN</span><span id="val-g" class="mono" style="color:#10b981;">0</span></div><input type="range" id="range-g" min="0" max="255" value="0" style="width:100%;"></div>
-                            <div><div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px; font-weight:bold;"><span style="color:#3b82f6;">BLUE</span><span id="val-b" class="mono" style="color:#3b82f6;">0</span></div><input type="range" id="range-b" min="0" max="255" value="0" style="width:100%;"></div>
-                        </div>
-                    </div><button onclick="app.checkPalm()" class="btn-neon">確認光譜</button>`;
-            },
-            initPalmEvents() {
-                setTimeout(() => {
-                    const r = document.getElementById('range-r'), g = document.getElementById('range-g'), b = document.getElementById('range-b');
-                    if(!r) return;
-                    const upd = () => { 
-                        document.getElementById('color-preview').style.backgroundColor = `rgb(${r.value}, ${g.value}, ${b.value})`; 
-                        document.getElementById('val-r').innerText = r.value; document.getElementById('val-g').innerText = g.value; document.getElementById('val-b').innerText = b.value;
-                    };
-                    [r, g, b].forEach(el => el.addEventListener('input', upd));
-                }, 100);
-            },
-            checkPalm() {
-                const r = document.getElementById('range-r').value, g = document.getElementById('range-g').value, b = document.getElementById('range-b').value;
-                if (r == 192 && g == 28 && b == 64) this.completeStage('palm'); else this.toast('光譜頻率錯誤');
-            },
-
-            getGatePuzzle() {
-                const letters = ['A','B','C','D','E','F','G']; let dialHtml = ''; const r = 110; const c = 128;
-                letters.forEach((l, i) => {
-                    const deg = i * (360/7); const rad = deg * (Math.PI/180);
-                    const x = c + r * Math.sin(rad); const y = c - r * Math.cos(rad);
-                    dialHtml += `<div class="dial-letter" style="left:${x}px; top:${y}px; transform: translate(-50%, -50%) rotate(${deg}deg);">${l}</div>`;
-                });
-                return `
-                    <div style="user-select:none;">
-                        <div style="background:var(--bg-color); border:1px solid var(--border-color); padding:12px; border-radius:8px; margin-bottom:24px; font-size:0.75rem; color:var(--text-sub); line-height:1.5;" class="mono">
-                            <div><span class="text-accent">A.</span> 改為國立臺灣大學</div><div><span class="text-accent">B.</span> 校友獲得諾貝爾獎</div><div><span class="text-accent">C.</span> 這一年學生數為59人</div><div><span class="text-accent">D.</span> 舉辦首屆杜鵑花節</div><div><span class="text-accent">E.</span> 公布設立醫學部</div><div><span class="text-accent">F.</span> 成立國立臺灣大學聯盟</div><div><span class="text-accent">G.</span> 公布校歌</div>
-                        </div>
-                        <div class="dial-wrapper" id="dial-container">
-                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:180px; height:180px; border-radius:50%; border:2px solid rgba(255,255,255,0.1); pointer-events:none;"></div>
-                            ${dialHtml}
-                            <div class="dial-knob" id="gate-knob">
-                                <div class="dial-pointer"></div>
-                                <div class="text-center">
-                                    <div style="font-size:10px; color:var(--text-sub); letter-spacing:1px;">順序</div>
-                                    <div style="font-size:2rem; font-weight:bold; color:white; font-family:monospace;" id="gate-seq-num">1</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid-2 mb-4">
-                            <button onclick="app.resetGateLock()" class="btn-secondary">重設</button>
-                            <button onclick="app.confirmGateSelection()" class="btn-neon">確認鎖定</button>
-                        </div>
-                        <div class="grid-4" id="gate-progress" style="grid-template-columns: repeat(7, 1fr); background:var(--bg-color); padding:10px; border-radius:8px; border:1px solid var(--border-color);"></div>
-                    </div>`;
-            },
-            initGateLock() {
-                this.gateRotation = 0; this.isDragging = false; this.updateGateUI();
-                const knob = document.getElementById('gate-knob'); const container = document.getElementById('dial-container');
-                const start = (e) => { this.isDragging = true; e.preventDefault(); };
-                const move = (e) => {
-                    if (!this.isDragging) return; e.preventDefault();
-                    const rect = container.getBoundingClientRect(); const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
-                    const cx_t = e.touches ? e.touches[0].clientX : e.clientX; const cy_t = e.touches ? e.touches[0].clientY : e.clientY;
-                    this.gateRotation = (Math.atan2(cy_t - cy, cx_t - cx) * (180 / Math.PI)) + 90;
-                    document.getElementById('gate-knob').style.transform = `translate(-50%, -50%) rotate(${this.gateRotation}deg)`;
-                };
-                const end = (e) => {
-                    if (!this.isDragging) return; this.isDragging = false;
-                    const step = 360/7; let norm = this.gateRotation % 360; if(norm < 0) norm += 360;
-                    this.gateRotation = Math.round(norm / step) * step;
-                    const el = document.getElementById('gate-knob');
-                    el.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                    el.style.transform = `translate(-50%, -50%) rotate(${this.gateRotation}deg)`;
-                    setTimeout(() => { el.style.transition = 'none'; }, 300);
-                };
-                knob.addEventListener('mousedown', start); knob.addEventListener('touchstart', start);
-                window.addEventListener('mousemove', move); window.addEventListener('touchmove', move, { passive: false });
-                window.addEventListener('mouseup', end); window.addEventListener('touchend', end);
-            },
-            resetGateLock() { this.state.gateLockIndex = 0; this.state.gateLockSequence = []; this.gateRotation = 0; document.getElementById('gate-knob').style.transform = `translate(-50%, -50%) rotate(0deg)`; this.updateGateUI(); this.toast('密碼鎖已重置'); },
-            confirmGateSelection() {
-                const letters = ['A','B','C','D','E','F','G']; 
-                let deg = this.gateRotation % 360; if (deg < 0) deg += 360;
-                this.state.gateLockSequence.push(letters[Math.round(deg / (360/7)) % 7]);
-                this.state.gateLockIndex++;
-                if (this.state.gateLockIndex < 7) { this.updateGateUI(); const k = document.getElementById('gate-knob'); k.style.borderColor = 'var(--accent-pink)'; setTimeout(() => k.style.borderColor = '#334155', 200); }
-                else { if (this.state.gateLockSequence.join('') === 'CEAGBDF') this.completeStage('gate'); else { this.toast('排序錯誤，系統重置'); this.resetGateLock(); } }
-            },
-            updateGateUI() {
-                const next = this.state.gateLockIndex + 1;
-                if(document.getElementById('gate-seq-num')) document.getElementById('gate-seq-num').innerText = next > 7 ? 7 : next;
-                const prog = document.getElementById('gate-progress');
-                if(prog) {
-                    prog.innerHTML = '';
-                    for(let i=0; i<7; i++) {
-                        const isLocked = i < this.state.gateLockIndex;
-                        const cls = isLocked ? 'background:var(--accent-pink); color:white; border:1px solid var(--accent-pink);' : 'background:var(--card-bg); color:var(--text-sub); border:1px solid var(--border-color);';
-                        prog.innerHTML += `<div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:4px; font-weight:bold; font-size:1.2rem; font-family:monospace; ${cls}">${isLocked ? this.state.gateLockSequence[i] : '?'}</div>`;
-                    }
+            // Puzzles
+            highlightError(id) {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.style.borderBottomColor = '#ef4444';
+                    setTimeout(() => el.style.borderBottomColor = '#334155', 1000);
                 }
             },
 
-            getWafflePuzzle() {
-                return `<div class="text-center mb-6"><div style="display:inline-flex; width:64px; height:64px; border-radius:50%; background:var(--bg-color); border:1px solid var(--border-color); align-items:center; justify-content:center; margin-bottom:12px; box-shadow:0 0 10px rgba(0,0,0,0.3);"><i class="fa-solid fa-music" style="color:var(--accent-pink); font-size:1.5rem;"></i></div><p class="text-sub">點擊播放按鈕，聆聽旋律中的音符（例如 Do=C），拼出對應的英文單字。</p></div><div class="mb-6" style="display:flex; flex-direction:column; gap:12px;">${['E,G,G','B,E,E,F','C,A,B,B,A,G,E'].map((n, i) => `<div style="background:var(--bg-color); border:1px solid var(--border-color); padding:12px; border-radius:8px; display:flex; align-items:center; gap:12px;"><span class="mono" style="color:var(--accent-pink); font-weight:bold;">Q${i+1}</span><button onclick="app.playMelody(['${n.split(',').join("','")}'])" style="background:#7c3aed; color:white; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-play" style="font-size:0.7rem;"></i></button><input type="text" id="waffle-q${i+1}" class="input-field" placeholder="TYPE HERE"></div>`).join('')}</div><div style="display:flex; justify-content:center; margin-bottom:20px;"><button onclick="app.playMelody(['C'])" style="background:none; border:none; color:var(--text-sub); font-size:0.8rem; cursor:pointer;"><i class="fa-regular fa-circle-play"></i> 試聽基準音 C (Do)</button></div><button onclick="app.checkWaffle()" class="btn-neon">提交驗證</button>`;
-            },
-            initWaffleEvents() {},
-            checkWaffle() {
-                const ans = ['EGG','BEEF','CABBAGE']; let c = 0;
-                ans.forEach((a, i) => { const el = document.getElementById(`waffle-q${i+1}`); if(el.value.trim().toUpperCase() === a) c++; else { el.style.borderBottomColor = 'var(--danger)'; setTimeout(() => el.style.borderBottomColor = 'var(--border-color)', 1000); } });
-                if(c===3) this.completeStage('waffle'); else this.toast(`答對 ${c}/3 題`);
+            checkAnswer(id, inp, ans) {
+                const v = document.getElementById(inp).value.trim().toUpperCase();
+                if (v === ans.toString()) this.completeStage(id);
+                else { this.toast('答案錯誤'); this.highlightError(inp); }
             },
 
-            getBellPuzzle() {
-                return `<div class="card text-center mb-4"><div class="custom-scrollbar" style="text-align:left; font-size:0.85rem; color:var(--text-sub); margin-bottom:20px; height:120px; overflow-y:auto; border-left:2px solid var(--border-color); padding-left:12px;"><p style="color:white; font-weight:bold; margin-bottom:8px;">事件紀錄：</p><ul style="list-style-type:disc; padding-left:20px; line-height:1.6;"><li>環境氣溫：<span class="text-accent">15°C</span></li><li>傅鐘：間隔 <span class="text-accent">3秒</span>，共 <span class="text-accent">21下</span></li><li>位置：距真傅鐘 <span class="text-accent">1700m</span></li><li>干擾：假喇叭在中間，距奎哥近 <span class="text-accent">200m</span> (1500m)</li><li>觀測：假鐘第一聲比真鐘早 <span class="text-accent">12秒</span></li></ul></div><div style="display:flex; flex-direction:column; gap:16px;"><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q1 音速 v (m/s)</label><input type="number" id="bell-q1" class="input-field"></div><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q2 假喇叭提早 (s)</label><input type="number" id="bell-q2" class="input-field"></div><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q3 真正遲到倒數 (s)</label><input type="number" id="bell-q3" class="input-field"></div></div></div><button onclick="app.checkBellAns()" class="btn-neon">提交驗證</button>`;
-            },
-            checkBellAns() {
-                const q1 = document.getElementById('bell-q1').value.trim(), q2 = document.getElementById('bell-q2').value.trim(), q3 = document.getElementById('bell-q3').value.trim();
-                let c = 0; if(q1 == '340') c++; else this.highlightError('bell-q1'); if(q2 == '11.4') c++; else this.highlightError('bell-q2'); if(q3 == '72') c++; else this.highlightError('bell-q3');
-                if(c===3) this.completeStage('bell'); else this.toast(`答對 ${c}/3 題`);
+            checkAnswerText(id, inp, anss) {
+                const v = document.getElementById(inp).value.trim();
+                if (anss.includes(v)) this.completeStage(id);
+                else { this.toast('答案錯誤'); this.highlightError(inp); }
             },
 
-            getLibraryPuzzle() {
-                return `<div class="card text-center mb-4"><div style="text-align:left; font-size:0.85rem; color:var(--text-sub); margin-bottom:20px; border-left:2px solid var(--border-color); padding-left:12px;"><p style="color:white; font-weight:bold; margin-bottom:8px;">觀測數據：</p><ul style="list-style-type:disc; padding-left:20px; line-height:1.6;"><li>觀測點：總圖書館樓頂</li><li>目標A (正西)：圖資系館 <span class="text-accent">俯角 10°</span></li><li>目標B (正南)：森林系館 <span class="text-accent">俯角 8°</span></li></ul><div style="margin-top:12px; background:rgba(255,255,255,0.05); padding:8px; border-radius:4px; font-size:0.7rem;"><i class="fa-brands fa-google"></i> 提示：利用 Google Maps 測量地標距離</div></div><div style="display:flex; flex-direction:column; gap:16px;"><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q1 AB系館距離 (m)</label><input type="number" id="lib-q1" class="input-field"></div><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q2 奎哥所在高度 (m)</label><input type="number" id="lib-q2" class="input-field"></div></div></div><button onclick="app.checkLibraryAns()" class="btn-neon">提交驗證</button>`;
+            completeStage(id) {
+                if (!this.state.completedStages.includes(id)) {
+                    this.state.completedStages.push(id);
+                    this.saveProgress();
+                    alert("解鎖成功！");
+                }
+                this.render();
             },
-            initLibraryEvents() {},
-            checkLibraryAns() {
-                const q1 = document.getElementById('lib-q1').value.trim(), q2 = document.getElementById('lib-q2').value.trim();
-                let c = 0; if(q1 == '90') c++; else this.highlightError('lib-q1'); if(q2 == '21') c++; else this.highlightError('lib-q2');
-                if(c===2) this.completeStage('library'); else this.toast(`答對 ${c}/2 題`);
+
+            // Puzzle HTML Generators
+            getGymPuzzle() {
+                return `<div>
+                    <p style="color:#94a3b8; font-size:0.9rem;">$f(x) = x^3 - 3x + 1$，求 x>0 的局部極小值？</p>
+                    <input type="text" id="ans-gym" placeholder="輸入數值" class="input-field">
+                    <button onclick="app.checkAnswer('gym', 'ans-gym', '-1')" class="btn-neon" style="margin-top:10px;">驗證</button>
+                </div>`;
+            },
+            
+            getLakePuzzle() {
+                return `<div>
+                    <p style="color:#94a3b8; font-size:0.9rem;">李白《月下獨酌》中，描述物理現象結果的詩句（五個字）？</p>
+                    <input type="text" id="ans-lake" placeholder="輸入詩句" class="input-field">
+                    <button onclick="app.checkAnswerText('lake', 'ans-lake', ['對影成三人'])" class="btn-neon" style="margin-top:10px;">驗證</button>
+                </div>`;
             },
 
             getSubwayPuzzle() {
                 const opts = ['台北車站', '新店', '秀朗橋', '南勢角', '雙連', '忠孝復興', '龍山寺', '中和', '行天宮', '小碧潭'];
-                let h = `<div class="card mb-4"><p class="text-sub" style="margin-bottom:16px; line-height:1.6;"><span class="text-accent" style="font-weight:bold;">租屋篩選條件：</span><br>1. 離學校(公館) 6 站捷運以內<br>2. 最多只需要換線 1 次</p><div class="grid-2">`;
-                opts.forEach(o => h += `<label class="checkbox-label"><input type="checkbox" name="subway-opt" value="${o}"><span style="font-size:0.8rem; color:var(--text-main);">${o}</span></label>`);
-                return h + `</div></div><button onclick="app.checkSubwayAns()" class="btn-neon">提交驗證</button>`;
+                let h = `<div style="margin-bottom:15px; color:#94a3b8; font-size:0.9rem;">條件：離公館6站內、換線最多1次。請勾選：</div><div class="grid-2">`;
+                opts.forEach(o => h += `<label class="checkbox-label"><input type="checkbox" name="subway-opt" value="${o}"> <span style="color:#e2e8f0; font-size:0.8rem;">${o}</span></label>`);
+                return h + `</div><button onclick="app.checkSubwayAns()" class="btn-neon" style="margin-top:10px;">驗證</button>`;
             },
             checkSubwayAns() {
                 const corr = ['台北車站', '新店', '秀朗橋', '南勢角', '龍山寺', '行天宮', '小碧潭'].sort();
@@ -812,54 +648,197 @@
                 if(corr.length === chk.length && corr.every((v, i) => v === chk[i])) this.completeStage('subway'); else this.toast('選擇錯誤');
             },
 
-            getLakePuzzle() {
-                return `<div class="card text-center mb-4"><i class="fa-solid fa-moon" style="font-size:2rem; color:var(--accent-yellow); margin-bottom:16px; display:block;"></i><div style="text-align:left; font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;"><p style="font-weight:bold; color:var(--accent-pink); margin-bottom:8px;">光學觀測實驗報告：</p><div style="background:var(--bg-color); padding:10px; border-radius:6px; border:1px solid var(--border-color); font-family:monospace; font-size:0.75rem; margin-bottom:12px;"><p>觀測者: 李白 (N=1)</p><p>光源: 明月</p><p>介質: 酒/地面</p><p>結果: 影子 + 像</p></div><p style="line-height:1.6; border-left:2px solid var(--border-color); padding-left:10px; margin-bottom:12px;">當光源照射物體，並經過介質反射後。觀測者聲稱系統中出現了<span class="text-accent">「三個實體」</span>。</p><p style="font-size:0.75rem;">請根據唐代學者李白的《光學觀測筆記》（原名：月下獨酌），輸入描述此物理現象結果的詩句（五個字）。</p></div><input type="text" id="ans-lake" placeholder="輸入五字詩句" class="input-field"></div><button onclick="app.checkAnswerText('lake', 'ans-lake', ['對影成三人'])" class="btn-neon">提交驗證</button>`;
+            getBellPuzzle() {
+                return `
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div><label style="font-size:0.7rem; color:#94a3b8;">Q1 音速 (m/s)</label><input type="number" id="bell-q1" class="input-field"></div>
+                        <div><label style="font-size:0.7rem; color:#94a3b8;">Q2 假喇叭提早 (s)</label><input type="number" id="bell-q2" class="input-field"></div>
+                        <div><label style="font-size:0.7rem; color:#94a3b8;">Q3 倒數 (s)</label><input type="number" id="bell-q3" class="input-field"></div>
+                    </div>
+                    <button onclick="app.checkBellAns()" class="btn-neon" style="margin-top:15px;">驗證</button>
+                `;
             },
-            getGymPuzzle() {
-                return `<div class="card text-center mb-4"><p class="text-sub" style="text-align:left; margin-bottom:16px;">修正方程式：$f(x) = x^3 - 3x + 1$。請計算此函數在 $x > 0$ 區域內的局部極小值是多少？</p><input type="text" id="ans-gym" placeholder="輸入數值" class="input-field"></div><button onclick="app.checkAnswer('gym', 'ans-gym', '-1')" class="btn-neon">提交驗證</button>`;
+            checkBellAns() {
+                const q1 = document.getElementById('bell-q1').value, q2 = document.getElementById('bell-q2').value, q3 = document.getElementById('bell-q3').value;
+                if(q1=='340' && q2=='11.4' && q3=='72') this.completeStage('bell'); else this.toast('答案錯誤');
             },
 
-            highlightError(id) { const el = document.getElementById(id); el.style.borderBottomColor = 'var(--danger)'; setTimeout(()=>el.style.borderBottomColor = 'var(--border-color)', 1000); },
-            checkAnswer(id, inp, ans) { const v = document.getElementById(inp).value.trim().toUpperCase(); if (v === ans.toString()) this.completeStage(id); else { this.toast('答案錯誤'); this.highlightError(inp); } },
-            checkAnswerText(id, inp, anss) { const v = document.getElementById(inp).value.trim(); if (anss.includes(v)) this.completeStage(id); else { this.toast('答案錯誤'); this.highlightError(inp); } },
-            completeStage(id) {
-                if (!this.state.completedStages.includes(id)) {
-                    this.state.completedStages.push(id); this.saveProgress();
-                    const c = STAGES[id].code;
-                    document.getElementById('app-container').innerHTML = `<div class="intro-container fade-in"><div style="width:80px; height:80px; border-radius:50%; background:var(--card-bg); border:1px solid var(--accent-pink); display:flex; align-items:center; justify-content:center; margin-bottom:20px; box-shadow:0 0 20px rgba(217,70,239,0.3);"><i class="fa-solid fa-unlock" style="font-size:2rem; color:white;"></i></div><div class="mono" style="color:var(--accent-pink); font-size:0.8rem; letter-spacing:2px; margin-bottom:8px;">SYSTEM_UNLOCKED</div><h2 style="font-size:1.8rem; font-weight:bold; color:white; margin-bottom:20px;">解鎖成功</h2><div style="background:var(--bg-color); border:1px solid var(--border-color); padding:20px; border-radius:8px; margin-bottom:30px;"><div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:8px;">獲得金鑰碎片</div><div class="mono" style="font-size:2.5rem; font-weight:bold; color:white;">${c}</div></div><button onclick="app.navigate('mission')" class="btn-secondary">前往下一站</button></div>`;
-                } else this.render();
+            getLibraryPuzzle() {
+                return `
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div><label style="font-size:0.7rem; color:#94a3b8;">Q1 兩館距離 (m)</label><input type="number" id="lib-q1" class="input-field"></div>
+                        <div><label style="font-size:0.7rem; color:#94a3b8;">Q2 奎哥高度 (m)</label><input type="number" id="lib-q2" class="input-field"></div>
+                    </div>
+                    <button onclick="app.checkLibraryAns()" class="btn-neon" style="margin-top:15px;">驗證</button>
+                `;
             },
-            renderClues(container) {
-                const route = TEAM_ROUTES[this.state.teamId];
-                let html = `<div class="section-title"><h2>資料庫碎片</h2><span class="mono" style="font-size:0.7rem; color:var(--text-sub);">DB_STATUS: ${this.state.completedStages.length}/${route.length}</span></div><div class="grid-2">`;
-                route.forEach(k => {
-                    const s = STAGES[k]; const u = this.state.completedStages.includes(k);
-                    html += `<div class="card" style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0; padding:0; border-color:${u?'var(--accent-pink)':'var(--border-color)'}; box-shadow:${u?'0 0 10px rgba(217,70,239,0.2)':'none'};">${u ? `<span class="mono" style="font-size:2.5rem; font-weight:bold; color:var(--accent-pink); margin-bottom:8px;">${s.code}</span><span style="font-size:0.7rem; color:var(--text-sub);">${s.name}</span>` : `<i class="fa-solid fa-lock" style="font-size:1.5rem; color:var(--border-color); margin-bottom:8px;"></i><span class="mono" style="font-size:0.7rem; color:var(--border-color);">LOCKED</span>`}</div>`;
+            checkLibraryAns() {
+                const q1 = document.getElementById('lib-q1').value, q2 = document.getElementById('lib-q2').value;
+                if(q1=='90' && q2=='21') this.completeStage('library'); else this.toast('答案錯誤');
+            },
+
+            getPalmPuzzle() {
+                return `
+                    <div id="color-preview" style="width:100%; height:50px; background:black; margin-bottom:10px; border-radius:4px; border:1px solid #334155;"></div>
+                    <div style="margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#ef4444;"><span>R</span><span id="val-r">0</span></div>
+                        <input type="range" id="range-r" min="0" max="255" value="0" style="width:100%;">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#10b981;"><span>G</span><span id="val-g">0</span></div>
+                        <input type="range" id="range-g" min="0" max="255" value="0" style="width:100%;">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#3b82f6;"><span>B</span><span id="val-b">0</span></div>
+                        <input type="range" id="range-b" min="0" max="255" value="0" style="width:100%;">
+                    </div>
+                    <button onclick="app.checkPalm()" class="btn-neon">確認光譜</button>
+                `;
+            },
+            initPalmEvents() {
+                const update = () => {
+                    const r = document.getElementById('range-r').value;
+                    const g = document.getElementById('range-g').value;
+                    const b = document.getElementById('range-b').value;
+                    document.getElementById('color-preview').style.backgroundColor = 'rgb('+r+','+g+','+b+')';
+                    document.getElementById('val-r').innerText = r;
+                    document.getElementById('val-g').innerText = g;
+                    document.getElementById('val-b').innerText = b;
+                };
+                ['r','g','b'].forEach(c => document.getElementById('range-'+c).addEventListener('input', update));
+            },
+            checkPalm() {
+                const r = document.getElementById('range-r').value, g = document.getElementById('range-g').value, b = document.getElementById('range-b').value;
+                if(r==192 && g==28 && b==64) this.completeStage('palm'); else this.toast('光譜錯誤');
+            },
+
+            // Waffle
+            getWafflePuzzle() {
+                return `
+                    <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px;">
+                        ${['E,G,G','B,E,E,F','C,A,B,B,A,G,E'].map((n, i) => 
+                        `<div style="display:flex; gap:8px; align-items:center;">
+                            <span class="mono" style="color:#d946ef;">Q${i+1}</span>
+                            <button onclick="app.playMelody(['${n.split(',').join("','")}'])" style="background:#7c3aed; color:white; border:none; border-radius:50%; width:24px; height:24px;">▶</button>
+                            <input type="text" id="waffle-q${i+1}" class="input-field" style="flex:1;">
+                         </div>`).join('')}
+                    </div>
+                    <div style="text-align:center; margin-bottom:15px;"><button onclick="app.playMelody(['C'])" style="background:none; border:none; color:#94a3b8;">試聽 C (Do)</button></div>
+                    <button onclick="app.checkWaffle()" class="btn-neon">驗證</button>
+                `;
+            },
+            
+            // Gate
+            getGatePuzzle() {
+                const letters = ['A','B','C','D','E','F','G'];
+                let html = '';
+                letters.forEach((l, i) => {
+                    const deg = i * (360/7);
+                    const rad = deg * (Math.PI/180);
+                    const x = 128 + 110 * Math.sin(rad);
+                    const y = 128 - 110 * Math.cos(rad);
+                    html += `<div class="dial-letter" style="left:${x}px; top:${y}px; transform: translate(-50%, -50%) rotate(${deg}deg);">${l}</div>`;
                 });
-                container.innerHTML = html + `</div>`;
+                return `
+                    <div style="background:#0b1121; padding:10px; border-radius:8px; border:1px solid #334155; margin-bottom:20px; font-size:0.75rem; color:#94a3b8;">
+                        <div>A.改為國立臺灣大學 B.校友獲諾貝爾獎 C.學生數59人 D.首屆杜鵑花節 E.公布醫學部 F.臺大系統聯盟 G.公布校歌</div>
+                    </div>
+                    <div class="dial-wrapper" id="dial-container">
+                        ${html}
+                        <div class="dial-knob" id="gate-knob"><div class="dial-pointer"></div></div>
+                    </div>
+                    <div class="grid-2" style="margin-top:20px;">
+                        <button onclick="app.resetGateLock()" class="btn-secondary">重設</button>
+                        <button onclick="app.confirmGateSelection()" class="btn-neon">鎖定</button>
+                    </div>
+                    <div id="gate-progress" style="margin-top:10px; display:flex; justify-content:center; gap:5px;"></div>
+                `;
+            },
+            initGateLock() {
+                this.gateRotation = 0; this.gateLockIndex = 0; this.gateLockSequence = []; this.updateGateUI();
+                const knob = document.getElementById('gate-knob');
+                // Simple touch logic for knob
+                knob.onclick = () => {
+                    this.gateRotation += (360/7);
+                    knob.style.transform = 'translate(-50%, -50%) rotate('+this.gateRotation+'deg)';
+                };
+            },
+            resetGateLock() {
+                this.gateLockIndex = 0; this.gateLockSequence = []; this.gateRotation = 0;
+                document.getElementById('gate-knob').style.transform = 'translate(-50%, -50%) rotate(0deg)';
+                this.updateGateUI();
+            },
+            confirmGateSelection() {
+                const letters = ['A','B','C','D','E','F','G'];
+                let idx = Math.round((this.gateRotation % 360) / (360/7)) % 7;
+                this.gateLockSequence.push(letters[idx]);
+                this.gateLockIndex++;
+                if(this.gateLockIndex < 7) { this.updateGateUI(); }
+                else {
+                    if(this.gateLockSequence.join('') === 'CEAGBDF') this.completeStage('gate');
+                    else { this.toast('錯誤'); this.resetGateLock(); }
+                }
+            },
+            updateGateUI() {
+                let html = '';
+                for(let i=0; i<7; i++) {
+                    const filled = i < this.gateLockIndex;
+                    html += `<div style="width:20px; height:20px; border:1px solid #334155; text-align:center; color:white; background:${filled?'#d946ef':'transparent'}">${filled?this.gateLockSequence[i]:''}</div>`;
+                }
+                document.getElementById('gate-progress').innerHTML = html;
+            },
+
+            // Clues & Final
+            renderClues(container) {
+                let html = '<div class="grid-2">';
+                TEAM_ROUTES[this.state.teamId].forEach(k => {
+                    const u = this.state.completedStages.includes(k);
+                    const s = STAGES[k];
+                    html += `<div class="card" style="text-align:center;">${u ? `<span style="font-size:2rem; color:#38bdf8; font-weight:bold;">${s.code}</span>` : '<i class="fa-solid fa-lock" style="font-size:1.5rem; color:#334155;"></i>'}</div>`;
+                });
+                container.innerHTML = html + '</div>';
             },
             renderFinal(container) {
-                const ok = this.state.completedStages.length === TEAM_ROUTES[this.state.teamId].length;
-                container.innerHTML = `<div class="section-title" style="border-left-color:var(--danger);"><h2>終端核心</h2><span class="mono" style="font-size:0.7rem; color:var(--danger);">ACCESS_LEVEL: ADMIN</span></div><div class="card text-center" style="padding:30px;"><div style="margin-bottom:20px; display:inline-block;"><i class="fa-solid fa-shield-halved" style="font-size:3rem; color:${ok? 'var(--danger)':'var(--border-color)'};"></i></div><p class="text-sub mb-4">請輸入完整的「智慧之鑰」代碼以解鎖系統核心。</p><div style="display:flex; justify-content:center; gap:8px; margin-bottom:24px;"><input type="text" id="final-part1" class="input-field" style="width:80px;" maxlength="4" ${!ok?'disabled':''}><span class="mono" style="font-size:1.5rem; color:var(--text-sub);">_</span><input type="text" id="final-part2" class="input-field" style="width:80px;" maxlength="4" ${!ok?'disabled':''}></div>${!ok ? `<div style="font-size:0.75rem; color:var(--danger); background:rgba(239,68,68,0.1); padding:8px; border-radius:4px; border:1px solid rgba(239,68,68,0.2);"><i class="fa-solid fa-lock"></i> 存取被拒：需先完成所有任務</div>` : `<button onclick="app.checkFinal()" class="btn-neon" style="background:var(--danger); box-shadow:0 0 15px rgba(239,68,68,0.4);">執行解密程序</button>`}</div>`;
+                 const ok = this.state.completedStages.length === TEAM_ROUTES[this.state.teamId].length;
+                 container.innerHTML = `<div class="card text-center"><p class="text-sub mb-4">輸入密碼：</p><input id="final-code" class="input-field" ${!ok?'disabled':''}><button onclick="app.checkFinal()" class="btn-neon" style="margin-top:15px;">解密</button></div>`;
             },
             checkFinal() {
-                try {
-                    const p1 = document.getElementById('final-part1').value.trim().toUpperCase(); const p2 = document.getElementById('final-part2').value.trim().toUpperCase(); const input = `${p1}_${p2}`;
-                    if (btoa(input) === FINAL_ANSWER_HASH) {
-                        const container = document.getElementById('app-container');
-                        container.innerHTML = `<div class="intro-container fade-in"><div style="width:100%; max-width:320px; background:var(--bg-color); border:2px solid var(--success); border-radius:12px; padding:30px; text-align:center; box-shadow:0 0 30px rgba(16,185,129,0.2);"><div style="width:60px; height:60px; background:var(--success); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;"><i class="fa-solid fa-check" style="font-size:1.5rem; color:var(--bg-color);"></i></div><h2 style="font-size:1.5rem; font-weight:bold; color:white; margin-bottom:10px; letter-spacing:1px;">ACCESS GRANTED</h2><div style="font-size:0.9rem; color:var(--text-sub); margin-bottom:24px; line-height:1.5;"><p>恭喜獲得智慧之鑰！</p><p>請截圖此畫面領取獎勵。</p></div><div style="height:1px; background:rgba(16,185,129,0.3); width:100%; margin-bottom:20px;"></div><div class="mono" style="color:var(--success); font-size:0.8rem; letter-spacing:2px;">HASH: ${Date.now().toString(16).toUpperCase()}</div></div></div>`;
-                        this.toast('解密成功！');
-                    } else { this.toast('代碼錯誤 (ACCESS DENIED)'); }
-                } catch(e) { this.toast('格式錯誤'); }
+                if(btoa(document.getElementById('final-code').value.trim().toUpperCase()) === FINAL_ANSWER_HASH) {
+                    alert("ACCESS GRANTED! Hash: " + Date.now().toString(16).toUpperCase());
+                } else { this.toast('錯誤'); }
+            },
+
+            // Utility
+            playMelody(notes) {
+                this.initAudio();
+                notes.forEach((n, i) => {
+                    if(!this.noteFreqs[n]) return;
+                    const osc = this.audioCtx.createOscillator();
+                    const gain = this.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(this.audioCtx.destination);
+                    osc.frequency.value = this.noteFreqs[n];
+                    gain.gain.setValueAtTime(0.1, this.audioCtx.currentTime + i*0.5);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + i*0.5 + 0.4);
+                    osc.start(this.audioCtx.currentTime + i*0.5);
+                    osc.stop(this.audioCtx.currentTime + i*0.5 + 0.4);
+                });
             },
             getDist(lat1, lon1, lat2, lon2) {
-                const R = 6371; const dLat = (lat2-lat1)*(Math.PI/180); const dLon = (lon2-lon1)*(Math.PI/180);
-                const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180))*Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2)*Math.sin(dLon/2);
+                var R = 6371; 
+                var dLat = (lat2-lat1) * (Math.PI/180);
+                var dLon = (lon2-lon1) * (Math.PI/180); 
+                var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180)) * Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
                 return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+            },
+            toast(msg) {
+                const t = document.getElementById('toast');
+                document.getElementById('toast-msg').innerText = msg;
+                t.style.opacity = 1;
+                setTimeout(()=>t.style.opacity=0, 2000);
             }
         };
 
-        window.addEventListener('DOMContentLoaded', () => app.init());
+        window.onload = function() { app.init(); };
     </script>
 </body>
 </html>
