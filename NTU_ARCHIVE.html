@@ -3,110 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- [關鍵修正] 允許執行 inline script 和 data URI 圖片 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
+    
     <title>Project: NTU_LEGACY | 台大實境解謎</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     
-    <!-- 錯誤捕捉器 (Debug Console) - 如果網頁出錯，會顯示在最上方 -->
-    <script>
-        window.onerror = function(msg, url, line, col, error) {
-            var debugBox = document.getElementById('debug-console');
-            if (!debugBox) {
-                debugBox = document.createElement('div');
-                debugBox.id = 'debug-console';
-                debugBox.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(200,0,0,0.9);color:white;z-index:9999;padding:10px;font-family:monospace;font-size:12px;word-break:break-all;';
-                document.body.prepend(debugBox);
-            }
-            debugBox.innerHTML += '<div>[ERROR] ' + msg + ' (Line: ' + line + ')</div>';
-            return false;
-        };
-    </script>
-
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入字體與圖標 -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        ntu: { bg: '#0b1121', card: '#151e32', accent: '#38bdf8', border: '#1e293b', yellow: '#fbbf24' }
-                    },
-                    fontFamily: {
-                        sans: ['Noto Sans TC', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    boxShadow: {
-                        'neon': '0 0 10px rgba(56, 189, 248, 0.5)',
-                        'dial-inset': 'inset 0 0 20px rgba(0,0,0,0.8)',
-                    }
-                }
-            }
-        }
-    </script>
-
     <style>
-        body { background-color: #0b1121; color: #e2e8f0; overflow-x: hidden; touch-action: manipulation; }
-        .scanline { width: 100%; height: 100px; z-index: 10; background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(56, 189, 248, 0.03) 50%, rgba(0,0,0,0) 100%); opacity: 0.4; position: absolute; bottom: 100%; animation: scanline 8s linear infinite; pointer-events: none; }
+        /* --- 基礎設定 (Reset & Variables) --- */
+        :root {
+            --bg-color: #0b1121;
+            --card-bg: #151e32;
+            --border-color: #1e293b;
+            --text-main: #e2e8f0;
+            --text-sub: #94a3b8;
+            --accent-cyan: #38bdf8;
+            --accent-pink: #d946ef;
+            --accent-yellow: #fbbf24;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* --- 工具類別 (Utilities) --- */
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- 背景特效 --- */
+        .scanline {
+            width: 100%; height: 100px; position: fixed; bottom: 100%; left: 0; z-index: 1; pointer-events: none;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(56, 189, 248, 0.03) 50%, rgba(0,0,0,0) 100%);
+            animation: scanline 8s linear infinite;
+        }
         @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100%; } }
-        .neon-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(192, 38, 211, 0.05) 0%, transparent 40%); }
-        .btn-neon { background: linear-gradient(90deg, #d946ef 0%, #7c3aed 100%); color: white; font-weight: bold; border-radius: 0.5rem; border: none; box-shadow: 0 0 15px rgba(217, 70, 239, 0.4); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-        .btn-neon:hover { box-shadow: 0 0 25px rgba(217, 70, 239, 0.6); transform: translateY(-2px); filter: brightness(1.1); }
-        .btn-neon:active { transform: translateY(1px); box-shadow: 0 0 10px rgba(217, 70, 239, 0.3); }
-        .btn-neon::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 50%); pointer-events: none; }
-        .dial-container { position: relative; width: 280px; height: 280px; margin: 0 auto; border-radius: 50%; background: linear-gradient(145deg, #1a233a, #0f1623); border: 12px solid #1e293b; box-shadow: 5px 5px 15px #070b15, -5px -5px 15px #1f2b45, inset 0 0 20px #000; user-select: none; }
-        .dial-track { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); pointer-events: none; }
-        .dial-letter { position: absolute; width: 40px; height: 40px; text-align: center; line-height: 40px; color: #94a3b8; font-weight: bold; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; pointer-events: none; transform-origin: center center; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .dial-knob { position: absolute; top: 50%; left: 50%; width: 170px; height: 170px; margin-left: -85px; margin-top: -85px; background: #151e32; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1); z-index: 10; cursor: grab; display: flex; align-items: center; justify-content: center; border: 1px solid #334155; }
-        .dial-knob:active { cursor: grabbing; border-color: #d946ef; }
-        .dial-pointer { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 20px solid #fbbf24; filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6)); }
-        .term-input { background: transparent; border: none; border-bottom: 2px solid #334155; color: #d946ef; outline: none; transition: all 0.3s; font-family: 'JetBrains Mono', monospace; }
-        .term-input:focus { border-bottom-color: #d946ef; background: rgba(217, 70, 239, 0.05); }
-        .ntu-card { background: #151e32; border: 1px solid #1e293b; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
+
+        .neon-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(217, 70, 239, 0.05) 0%, transparent 40%);
+        }
+
+        /* --- Header --- */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background: rgba(11, 17, 33, 0.95); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 16px; z-index: 50; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header-logo { display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .header-logo span:first-child { color: var(--accent-pink); font-size: 1.2rem; }
+        .header-controls { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; }
+        .team-badge { background: rgba(217, 70, 239, 0.1); color: var(--accent-pink); padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .reset-btn { background: none; border: none; color: var(--danger); cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.8rem; }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1; width: 100%; max-width: 480px; margin: 0 auto;
+            padding: 80px 16px 100px 16px; /* Top padding for header, Bottom for nav */
+            overflow-y: auto; position: relative; z-index: 10;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background: var(--bg-color); border-top: 1px solid var(--border-color);
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            z-index: 50; max-width: 480px; left: 50%; transform: translateX(-50%);
+        }
+        nav button {
+            background: none; border: none; color: var(--text-sub);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 4px; font-size: 0.7rem; cursor: pointer; transition: color 0.3s;
+        }
+        nav button i { font-size: 1.2rem; }
+        nav button.active { color: var(--accent-pink); }
+
+        /* --- Cards & Containers --- */
+        .card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .section-title {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; border-left: 4px solid var(--accent-pink); padding-left: 12px;
+        }
+        .section-title h2 { margin: 0; font-size: 1.2rem; color: white; }
+        .section-info { font-size: 0.75rem; color: var(--text-sub); }
+
+        /* --- Neon Button --- */
+        .btn-neon {
+            width: 100%; padding: 14px;
+            background: linear-gradient(90deg, #d946ef 0%, #7c3aed 100%);
+            color: white; font-weight: bold; border: none; border-radius: 8px;
+            font-size: 1rem; cursor: pointer;
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-neon:active { transform: scale(0.98); }
+        
+        .btn-secondary {
+            width: 100%; padding: 12px;
+            background: var(--bg-color); border: 1px solid var(--border-color);
+            color: var(--text-sub); border-radius: 8px; font-weight: bold;
+            cursor: pointer; transition: all 0.2s;
+        }
+
+        /* --- Inputs --- */
+        .input-field {
+            width: 100%; background: transparent; border: none;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--accent-pink); font-size: 1.2rem; text-align: center;
+            padding: 10px; outline: none; font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase; letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+        .input-field:focus { border-bottom-color: var(--accent-pink); background: rgba(217, 70, 239, 0.05); }
+
+        /* --- Grid Layouts --- */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+        /* --- Specific Puzzles --- */
+        /* Dial */
+        .dial-wrapper {
+            position: relative; width: 280px; height: 280px; margin: 20px auto;
+            border-radius: 50%; background: linear-gradient(145deg, #1a233a, #0f1623);
+            border: 12px solid var(--border-color);
+            box-shadow: 5px 5px 15px #070b15, -5px -5px 15px #1f2b45, inset 0 0 20px #000;
+            user-select: none;
+        }
+        .dial-knob {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 170px; height: 170px; border-radius: 50%;
+            background: var(--card-bg); border: 1px solid #334155;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; cursor: grab;
+        }
+        .dial-knob:active { cursor: grabbing; border-color: var(--accent-pink); }
+        .dial-pointer {
+            position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 12px solid transparent; border-right: 12px solid transparent;
+            border-bottom: 20px solid var(--accent-yellow);
+        }
+        .dial-letter {
+            position: absolute; width: 30px; height: 30px;
+            text-align: center; line-height: 30px; color: var(--text-sub);
+            font-weight: bold; font-family: monospace; font-size: 1.2rem;
+            pointer-events: none; transform-origin: center center;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            background: #1e293b; border: 1px solid var(--accent-pink); color: white;
+            padding: 12px 24px; border-radius: 8px; z-index: 100;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        #toast.show { opacity: 1; }
+
+        /* Intro Page */
+        .intro-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%; text-align: center; }
+        .logo-box { 
+            width: 120px; height: 120px; border-radius: 50%; overflow: hidden; 
+            border: 4px solid rgba(217, 70, 239, 0.5); 
+            box-shadow: 0 0 20px rgba(217, 70, 239, 0.3); margin-bottom: 20px;
+        }
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .title-main { font-size: 2rem; font-weight: bold; color: var(--accent-pink); letter-spacing: 0.2em; text-shadow: 0 0 10px rgba(217, 70, 239, 0.5); margin-bottom: 40px; }
+
+        /* Helpers */
+        .text-center { text-align: center; }
+        .text-accent { color: var(--accent-pink); }
+        .text-sub { color: var(--text-sub); font-size: 0.85rem; }
+        .w-full { width: 100%; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-4 { margin-bottom: 16px; }
+        .mt-2 { margin-top: 8px; }
+        .mt-4 { margin-top: 16px; }
+        .relative { position: relative; }
+        .img-container { width: 100%; height: 200px; overflow: hidden; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 16px; }
+        .img-cover { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Checkbox Override */
+        input[type="checkbox"] { width: 1.2rem; height: 1.2rem; margin-right: 8px; accent-color: var(--accent-pink); }
+        .checkbox-label { display: flex; align-items: center; padding: 10px; background: var(--border-color); border-radius: 6px; cursor: pointer; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
-        .word-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; font-family: 'JetBrains Mono', monospace; }
-        .word-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #1e293b; border: 1px solid #334155; color: #94a3b8; font-weight: bold; font-size: 1.2rem; cursor: pointer; transition: all 0.2s; }
-        .word-cell:hover { background: #334155; color: white; }
-        .word-cell.marked { background: #0ea5e9; color: #0f172a; border-color: #38bdf8; }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-center relative">
-    <div class="scanline fixed inset-0 h-full w-full pointer-events-none"></div>
+<body>
+
+    <div class="scanline"></div>
     <div class="neon-glow"></div>
 
-    <header class="fixed top-0 w-full bg-ntu-bg/90 backdrop-blur-md border-b border-ntu-border z-50 p-4 flex justify-between items-center shadow-lg">
-        <div class="flex items-center gap-2">
-            <span class="text-fuchsia-500 font-bold text-lg select-none">&gt;_</span>
-            <span class="mono font-bold text-gray-100 tracking-wider">NTU_SYSTEM</span>
+    <!-- Header -->
+    <header>
+        <div class="header-logo">
+            <span>&gt;_</span>
+            <span class="mono" style="color:white; letter-spacing: 2px;">NTU_SYSTEM</span>
         </div>
-        <div class="flex gap-4 text-xs mono items-center">
-            <div id="team-display" class="text-fuchsia-400 font-bold px-2 py-1 bg-fuchsia-500/10 rounded"></div>
-            <button onclick="app.resetGame()" class="text-red-400 hover:text-red-300 transition flex items-center gap-1">
+        <div class="header-controls">
+            <div id="team-display" class="team-badge"></div>
+            <button onclick="app.resetGame()" class="reset-btn">
                 <i class="fa-solid fa-triangle-exclamation"></i> 重置
             </button>
         </div>
     </header>
 
-    <main id="app-container" class="w-full max-w-md h-full pt-20 pb-32 px-4 overflow-y-auto relative scroll-smooth">
-        <!-- JS Render Content -->
-    </main>
+    <!-- Main Content -->
+    <main id="app-container"></main>
 
-    <nav class="fixed bottom-0 w-full max-w-md bg-ntu-bg border-t border-ntu-border p-3 grid grid-cols-3 gap-6 z-40 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
-        <button onclick="app.navigate('mission')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition active-nav group">
-            <i class="fa-solid fa-location-arrow text-xl group-active:scale-95"></i> <span class="text-[10px] mono">當前任務</span>
+    <!-- Navigation -->
+    <nav>
+        <button onclick="app.navigate('mission')" id="nav-mission">
+            <i class="fa-solid fa-location-arrow"></i> <span class="mono">當前任務</span>
         </button>
-        <button onclick="app.navigate('clues')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition group">
-            <i class="fa-solid fa-key text-xl group-active:scale-95"></i> <span class="text-[10px] mono">金鑰碎片</span>
+        <button onclick="app.navigate('clues')" id="nav-clues">
+            <i class="fa-solid fa-key"></i> <span class="mono">金鑰碎片</span>
         </button>
-        <button onclick="app.navigate('final')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition group">
-            <i class="fa-solid fa-lock text-xl group-active:scale-95"></i> <span class="text-[10px] mono">終端解碼</span>
+        <button onclick="app.navigate('final')" id="nav-final">
+            <i class="fa-solid fa-lock"></i> <span class="mono">終端解碼</span>
         </button>
     </nav>
 
-    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-slate-800 border border-fuchsia-500/30 text-white px-6 py-3 rounded shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-3 min-w-max">
-        <i class="fa-solid fa-circle-info text-fuchsia-400"></i> <span id="toast-msg" class="font-mono text-sm">Message</span>
+    <!-- Toast -->
+    <div id="toast">
+        <i class="fa-solid fa-circle-info"></i> <span id="toast-msg">Message</span>
     </div>
 
     <script>
@@ -287,17 +438,12 @@
                     if(el) el.textContent = `小隊 ${this.state.teamId}`;
                 }
                 
-                document.querySelectorAll('nav button').forEach(btn => {
-                   const onclick = btn.getAttribute('onclick');
-                   if(!onclick) return;
-                   const view = onclick.match(/'([^']+)'/)[1];
-                   if(view === this.state.currentView) {
-                       btn.classList.add('text-fuchsia-400');
-                       btn.classList.remove('text-slate-500');
-                   } else {
-                       btn.classList.remove('text-fuchsia-400');
-                       btn.classList.add('text-slate-500');
-                   }
+                ['mission', 'clues', 'final'].forEach(view => {
+                    const btn = document.getElementById(`nav-${view}`);
+                    if(btn) {
+                        if(view === this.state.currentView) btn.classList.add('active');
+                        else btn.classList.remove('active');
+                    }
                 });
             },
 
@@ -325,8 +471,8 @@
                 const t = document.getElementById('toast');
                 if(!t) return;
                 document.getElementById('toast-msg').textContent = msg;
-                t.classList.remove('opacity-0');
-                setTimeout(() => t.classList.add('opacity-0'), 3000);
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3000);
             },
 
             requestAdminSkip(id) {
@@ -359,20 +505,20 @@
             renderIntro(container) {
                 let buttonsHtml = '';
                 for(let i=1; i<=8; i++) {
-                    buttonsHtml += `<button onclick="app.setTeam(${i})" class="p-4 bg-ntu-card border border-ntu-border rounded-lg hover:border-fuchsia-500 hover:shadow-[0_0_10px_rgba(217,70,239,0.5)] hover:text-fuchsia-400 transition duration-300 font-mono text-sm">小隊 0${i}</button>`;
+                    buttonsHtml += `<button onclick="app.setTeam(${i})" class="btn-secondary">小隊 0${i}</button>`;
                 }
 
                 container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center min-h-full py-10 space-y-6 fade-in relative z-10">
-                        <div class="absolute w-64 h-64 bg-fuchsia-500/20 rounded-full blur-[80px] -z-10"></div>
-                        <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-fuchsia-500/50 shadow-[0_0_20px_rgba(217,70,239,0.3)] relative group">
-                            <div class="absolute inset-0 bg-fuchsia-500/10 group-hover:bg-transparent transition"></div>
-                            <img src="images/logo.png" onerror="this.src='https://via.placeholder.com/150?text=LOGO'" alt="Team Logo" class="w-full h-full object-cover p-1 bg-white/10 backdrop-blur-sm">
+                    <div class="intro-container fade-in">
+                        <div class="logo-box">
+                            <img src="images/logo.png" onerror="this.src='https://via.placeholder.com/150?text=LOGO'">
                         </div>
-                        <div class="text-3xl font-mono text-fuchsia-400 font-bold tracking-[0.3em] drop-shadow-neon mt-2">NTU ARCHIVE</div>
+                        
+                        <div class="title-main">NTU ARCHIVE</div>
+
                         <div class="w-full max-w-xs space-y-4">
-                            <p class="text-slate-400 text-sm mb-6 text-center">請選擇小隊編號以存取資料庫</p>
-                            <div class="grid grid-cols-2 gap-4">${buttonsHtml}</div>
+                            <p class="text-sub mb-6">請選擇小隊編號以存取資料庫</p>
+                            <div class="grid-2">${buttonsHtml}</div>
                         </div>
                     </div>`;
             },
@@ -383,57 +529,60 @@
                 
                 if (currentIndex >= route.length) {
                     container.innerHTML = `
-                        <div class="h-full flex flex-col items-center justify-center text-center fade-in">
-                            <div class="w-20 h-20 rounded-full bg-ntu-card flex items-center justify-center border border-fuchsia-500 mb-6 shadow-[0_0_15px_rgba(217,70,239,0.5)]">
-                                <i class="fa-solid fa-flag-checkered text-4xl text-ntu-yellow"></i>
+                        <div class="intro-container fade-in">
+                            <div class="w-20 h-20 rounded-full bg-transparent border border-accent-cyan flex items-center justify-center mb-6" style="border-color:var(--accent-yellow)">
+                                <i class="fa-solid fa-flag-checkered text-4xl" style="color:var(--accent-yellow)"></i>
                             </div>
-                            <h2 class="text-2xl font-bold text-white mb-2">任務全數完成</h2>
-                            <p class="text-slate-400 mb-8 text-sm">所有資料碎片已收集完畢。<br>請前往終端解碼以完成任務。</p>
-                            <button onclick="app.navigate('final')" class="px-8 py-4 btn-neon w-64 shadow-lg"><i class="fa-solid fa-terminal mr-2"></i> 前往終端機</button>
-                        </div>`;
+                            <h2 style="font-size:1.5rem; margin-bottom:10px;">任務全數完成</h2>
+                            <p class="text-sub mb-8">所有資料碎片已收集完畢。<br>請前往終端解碼以完成任務。</p>
+                            <button onclick="app.navigate('final')" class="btn-neon" style="width:auto; padding: 15px 40px;">
+                                <i class="fa-solid fa-terminal"></i> 前往終端機
+                            </button>
+                        </div>
+                    `;
                     return;
                 }
 
                 const currentStageId = route[currentIndex];
                 const s = STAGES[currentStageId];
                 const isArrived = this.state.arrivedStages.includes(currentStageId);
+
                 let content = `
-                    <div class="mb-6 flex items-center justify-between">
+                    <div class="section-title">
                         <div>
-                            <div class="text-xs font-mono text-fuchsia-400 mb-1">CURRENT_MISSION</div>
-                            <h2 class="text-xl font-bold text-white tracking-wide">任務 ${currentIndex + 1} <span class="text-slate-500 text-sm">/ ${route.length}</span></h2>
+                            <div class="mono" style="color:var(--accent-pink); font-size:0.7rem;">CURRENT_MISSION</div>
+                            <h2>任務 ${currentIndex + 1} <span style="font-size:0.8rem; color:var(--text-sub)">/ ${route.length}</span></h2>
                         </div>
-                        <div class="text-xs px-2 py-1 rounded border border-ntu-border bg-ntu-card text-slate-400">
-                            ${isArrived ? `<i class="fa-solid fa-location-dot text-fuchsia-400 mr-1"></i> ${s.name}` : '<i class="fa-solid fa-lock text-slate-600 mr-1"></i> 地點加密'}
+                        <div style="font-size:0.7rem; color:var(--text-sub); border:1px solid var(--border-color); padding:4px 8px; border-radius:4px; background:var(--bg-color);">
+                            ${isArrived ? `<i class="fa-solid fa-location-dot" style="color:var(--accent-pink)"></i> ${s.name}` : '<i class="fa-solid fa-lock"></i> 地點加密'}
                         </div>
-                    </div>`;
+                    </div>
+                `;
 
                 if (!isArrived) {
                     content += `
-                        <div class="fade-in ntu-card p-5">
+                        <div class="card fade-in">
                             <div class="mb-4">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <i class="fa-solid fa-map-pin text-red-400"></i>
-                                    <h3 class="text-lg font-bold text-white">${s.hintTitle}</h3>
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                                    <i class="fa-solid fa-map-pin" style="color:var(--danger)"></i>
+                                    <h3 style="margin:0; font-size:1.1rem;">${s.hintTitle}</h3>
                                 </div>
-                                <div class="rounded-lg overflow-hidden border border-ntu-border mb-4 shadow-lg relative group">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
-                                    <img src="${s.hintImage}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Not+Found'" class="w-full h-56 object-cover group-hover:scale-105 transition duration-700">
-                                    <div class="absolute bottom-3 left-3 z-20 text-xs text-white/80 mono">REF_IMG_${currentStageId.toUpperCase()}</div>
+                                <div class="img-container">
+                                    <img src="${s.hintImage}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Not+Found'" class="img-cover">
                                 </div>
-                                <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-ntu-border pl-3">${s.hintDesc}</p>
+                                <p style="color:var(--text-sub); font-size:0.9rem; line-height:1.6; border-left:2px solid var(--border-color); padding-left:12px;">${s.hintDesc}</p>
                             </div>
-                            <div class="border-t border-ntu-border pt-6 text-center">
-                                <button onclick="app.verifyLocation('${s.id}')" class="w-full btn-neon py-4 text-lg flex items-center justify-center gap-2">
+                            <div style="border-top:1px solid var(--border-color); padding-top:20px; text-align:center;">
+                                <button onclick="app.verifyLocation('${s.id}')" class="btn-neon">
                                     <i class="fa-solid fa-satellite-dish"></i> 掃描目前位置
                                 </button>
-                                <div id="check-status" class="text-xs text-ntu-yellow mt-3 min-h-[1.5rem] font-mono"></div>
-                                <div class="mt-2"><button onclick="app.requestAdminSkip('${s.id}')" class="text-[10px] text-slate-600 hover:text-slate-400 font-mono tracking-wider"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 定位異常？(輸入救援碼)</button></div>
+                                <div id="check-status" class="mono" style="color:var(--accent-yellow); font-size:0.7rem; margin-top:10px; min-height:1.5rem;"></div>
+                                <div class="mt-2"><button onclick="app.requestAdminSkip('${s.id}')" style="background:none; border:none; color:var(--text-sub); font-size:0.7rem; cursor:pointer;" class="mono"><i class="fa-solid fa-triangle-exclamation"></i> 定位異常？(輸入救援碼)</button></div>
                             </div>
                         </div>`;
                 } else {
                     let mediaHtml = '';
-                    if (s.image) mediaHtml += `<div class="mb-4 rounded overflow-hidden border border-ntu-border shadow-lg"><img src="${s.image}" onerror="this.style.display='none'" class="w-full object-cover"></div>`;
+                    if (s.image) mediaHtml += `<div class="img-container"><img src="${s.image}" onerror="this.style.display='none'" class="img-cover"></div>`;
 
                     let puzzleHtml = '';
                     switch (s.id) {
@@ -447,15 +596,15 @@
                         case 'palm': puzzleHtml = this.getPalmPuzzle(); break;
                     }
                     content += `
-                        <div class="fade-in ntu-card p-5">
-                            <div class="flex items-center justify-between mb-4 border-b border-ntu-border pb-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded bg-ntu-bg flex items-center justify-center border border-ntu-border"><i class="fa-solid ${s.icon} text-fuchsia-400"></i></div>
-                                    <span class="text-lg font-bold text-white">${s.name}</span>
+                        <div class="card fade-in">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <div style="width:32px; height:32px; background:var(--bg-color); border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--border-color); color:var(--accent-pink);"><i class="fa-solid ${s.icon}"></i></div>
+                                    <span style="font-weight:bold; font-size:1.1rem;">${s.name}</span>
                                 </div>
-                                <span class="text-[10px] bg-ntu-bg border border-ntu-border px-2 py-1 rounded text-slate-400 font-mono">${s.difficultyLabel}</span>
+                                <span class="mono" style="font-size:0.6rem; padding:2px 6px; border-radius:4px; background:var(--bg-color); color:var(--text-sub); border:1px solid var(--border-color);">${s.difficultyLabel}</span>
                             </div>
-                            <div class="text-sm text-slate-300 mb-6 leading-relaxed">${s.desc}</div>
+                            <div style="color:var(--text-sub); font-size:0.9rem; margin-bottom:20px; line-height:1.6;">${s.desc}</div>
                             ${mediaHtml}
                             ${puzzleHtml}
                         </div>`;
@@ -473,7 +622,7 @@
                 const s = STAGES[id];
                 const stat = document.getElementById('check-status');
                 stat.textContent = "正在連線衛星進行三角定位...";
-                stat.className = "text-xs text-fuchsia-400 animate-pulse mt-3 min-h-[1.5rem] font-mono";
+                stat.style.color = "var(--accent-cyan)";
 
                 if (!navigator.geolocation) { stat.textContent = "錯誤：瀏覽器不支援 GPS"; return; }
                 navigator.geolocation.getCurrentPosition(
@@ -481,15 +630,15 @@
                         const dist = this.getDist(p.coords.latitude, p.coords.longitude, s.lat, s.lon) * 1000;
                         if (dist < 100) {
                             stat.textContent = "訊號捕獲成功！正在解密...";
-                            stat.className = "text-xs text-emerald-400 font-bold mt-3 min-h-[1.5rem] font-mono";
+                            stat.style.color = "var(--success)";
                             setTimeout(() => this.forceArrive(id), 1500);
                         } else {
                             stat.textContent = `距離目標尚有 ${Math.round(dist)} 公尺`;
-                            stat.className = "text-xs text-red-400 mt-3 min-h-[1.5rem] font-mono";
+                            stat.style.color = "var(--danger)";
                             this.toast('位置太遠，請移動至目標地點');
                         }
                     },
-                    (e) => { stat.textContent = "GPS 讀取失敗 (" + e.message + ")"; stat.className = "text-xs text-red-500 mt-3 min-h-[1.5rem] font-mono"; },
+                    (e) => { stat.textContent = "GPS 讀取失敗 (" + e.message + ")"; stat.style.color = "var(--danger)"; },
                     { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
                 );
             },
@@ -504,25 +653,25 @@
                 this.render();
             },
 
-            // 7. 椰林大道 (Color Math)
+            /* --- PUZZLES --- */
             getPalmPuzzle() {
                 return `
-                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded mb-4">
-                        <div class="text-left text-sm text-slate-300 mb-6 space-y-2 border-l-2 border-slate-700 pl-3">
-                            <p class="font-bold text-white mb-2">光譜參數：</p>
-                            <ul class="list-disc list-inside text-slate-400 text-xs space-y-2">
-                                <li>R (紅): <span class="text-fuchsia-400">椰林大道兩側各96顆椰子樹，共幾棵？</span></li>
-                                <li>G (綠): <span class="text-fuchsia-400">第二個完全數 (Perfect Number)</span></li>
-                                <li>B (藍): <span class="text-fuchsia-400">氧原子 (O) 的原子序平方</span></li>
+                    <div class="card mb-4" style="background:var(--bg-color);">
+                        <div class="text-sub mb-4" style="border-left:2px solid var(--border-color); padding-left:12px;">
+                            <p style="color:white; margin-bottom:8px; font-weight:bold;">光譜參數：</p>
+                            <ul style="padding-left:20px; list-style-type:disc; font-size:0.8rem; line-height:1.5;">
+                                <li>R (紅): <span style="color:var(--accent-pink)">椰林大道兩側各96顆椰子樹，共幾棵？</span></li>
+                                <li>G (綠): <span style="color:var(--accent-pink)">第二個完全數 (Perfect Number)</span></li>
+                                <li>B (藍): <span style="color:var(--accent-pink)">氧原子 (O) 的原子序平方</span></li>
                             </ul>
                         </div>
-                        <div id="color-preview" class="w-full h-16 rounded mb-4 border border-slate-600 transition-colors duration-300" style="background-color:rgb(0,0,0)"></div>
-                        <div class="space-y-4">
-                            <div><div class="flex justify-between mb-1"><label class="text-xs font-bold text-red-400">RED</label><span id="val-r" class="text-xs mono font-bold text-red-400">0</span></div><input type="range" id="range-r" min="0" max="255" value="0" class="w-full accent-red-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"></div>
-                            <div><div class="flex justify-between mb-1"><label class="text-xs font-bold text-green-400">GREEN</label><span id="val-g" class="text-xs mono font-bold text-green-400">0</span></div><input type="range" id="range-g" min="0" max="255" value="0" class="w-full accent-green-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"></div>
-                            <div><div class="flex justify-between mb-1"><label class="text-xs font-bold text-blue-400">BLUE</label><span id="val-b" class="text-xs mono font-bold text-blue-400">0</span></div><input type="range" id="range-b" min="0" max="255" value="0" class="w-full accent-blue-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"></div>
+                        <div id="color-preview" style="width:100%; height:60px; border-radius:8px; margin-bottom:16px; border:1px solid var(--border-color); transition:background-color 0.3s; background-color:black;"></div>
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            <div><div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px; font-weight:bold;"><span style="color:#ef4444;">RED</span><span id="val-r" class="mono" style="color:#ef4444;">0</span></div><input type="range" id="range-r" min="0" max="255" value="0" style="width:100%;"></div>
+                            <div><div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px; font-weight:bold;"><span style="color:#10b981;">GREEN</span><span id="val-g" class="mono" style="color:#10b981;">0</span></div><input type="range" id="range-g" min="0" max="255" value="0" style="width:100%;"></div>
+                            <div><div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px; font-weight:bold;"><span style="color:#3b82f6;">BLUE</span><span id="val-b" class="mono" style="color:#3b82f6;">0</span></div><input type="range" id="range-b" min="0" max="255" value="0" style="width:100%;"></div>
                         </div>
-                    </div><button onclick="app.checkPalm()" class="w-full btn-neon py-3">確認光譜</button>`;
+                    </div><button onclick="app.checkPalm()" class="btn-neon">確認光譜</button>`;
             },
             initPalmEvents() {
                 setTimeout(() => {
@@ -540,28 +689,34 @@
                 if (r == 192 && g == 28 && b == 64) this.completeStage('palm'); else this.toast('光譜頻率錯誤');
             },
 
-            // 5. 台大校門 (Lock Puzzle)
             getGatePuzzle() {
-                const letters = ['A','B','C','D','E','F','G'];
-                let dialHtml = ''; const radius = 110; const centerOffset = 128;
+                const letters = ['A','B','C','D','E','F','G']; let dialHtml = ''; const r = 110; const c = 128;
                 letters.forEach((l, i) => {
-                    const angleDeg = i * (360/7);
-                    dialHtml += `<div class="dial-letter" style="left:${centerOffset + radius * Math.sin(angleDeg * (Math.PI/180))}px; top:${centerOffset - radius * Math.cos(angleDeg * (Math.PI/180))}px; transform: translate(-50%, -50%) rotate(${angleDeg}deg);">${l}</div>`;
+                    const deg = i * (360/7); const rad = deg * (Math.PI/180);
+                    const x = c + r * Math.sin(rad); const y = c - r * Math.cos(rad);
+                    dialHtml += `<div class="dial-letter" style="left:${x}px; top:${y}px; transform: translate(-50%, -50%) rotate(${deg}deg);">${l}</div>`;
                 });
                 return `
-                    <div class="select-none">
-                        <div class="text-xs text-slate-400 space-y-1 mb-6 p-3 bg-ntu-bg rounded border border-ntu-border font-mono leading-relaxed">
-                            <div><span class="text-fuchsia-400">A.</span> 改為國立臺灣大學</div>
-                            <div><span class="text-fuchsia-400">B.</span> 校友獲得諾貝爾獎</div>
-                            <div><span class="text-fuchsia-400">C.</span> 這一年學生數為59人</div>
-                            <div><span class="text-fuchsia-400">D.</span> 舉辦首屆杜鵑花節</div>
-                            <div><span class="text-fuchsia-400">E.</span> 公布設立醫學部</div>
-                            <div><span class="text-fuchsia-400">F.</span> 成立國立臺灣大學聯盟</div>
-                            <div><span class="text-fuchsia-400">G.</span> 公布校歌</div>
+                    <div style="user-select:none;">
+                        <div style="background:var(--bg-color); border:1px solid var(--border-color); padding:12px; border-radius:8px; margin-bottom:24px; font-size:0.75rem; color:var(--text-sub); line-height:1.5;" class="mono">
+                            <div><span class="text-accent">A.</span> 改為國立臺灣大學</div><div><span class="text-accent">B.</span> 校友獲得諾貝爾獎</div><div><span class="text-accent">C.</span> 這一年學生數為59人</div><div><span class="text-accent">D.</span> 舉辦首屆杜鵑花節</div><div><span class="text-accent">E.</span> 公布設立醫學部</div><div><span class="text-accent">F.</span> 成立國立臺灣大學聯盟</div><div><span class="text-accent">G.</span> 公布校歌</div>
                         </div>
-                        <div class="dial-container mb-6" id="dial-container"><div class="dial-track"></div>${dialHtml}<div class="dial-knob" id="gate-knob"><div class="dial-pointer"></div><div class="text-center"><div class="text-[10px] text-slate-500 font-mono tracking-widest">順序</div><div class="text-5xl font-bold text-white font-mono mt-1" id="gate-seq-num">1</div></div></div></div>
-                        <div class="flex gap-3 mb-4"><button onclick="app.resetGateLock()" class="flex-1 bg-ntu-bg border border-ntu-border hover:border-slate-500 text-slate-400 py-3 rounded font-bold transition"><i class="fa-solid fa-rotate-left mr-1"></i> 重設</button><button onclick="app.confirmGateSelection()" class="flex-[2] btn-neon py-3"><i class="fa-solid fa-lock mr-1"></i> 確認鎖定</button></div>
-                        <div class="flex justify-center gap-2 p-3 bg-ntu-bg rounded border border-ntu-border" id="gate-progress"></div>
+                        <div class="dial-wrapper" id="dial-container">
+                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:180px; height:180px; border-radius:50%; border:2px solid rgba(255,255,255,0.1); pointer-events:none;"></div>
+                            ${dialHtml}
+                            <div class="dial-knob" id="gate-knob">
+                                <div class="dial-pointer"></div>
+                                <div class="text-center">
+                                    <div style="font-size:10px; color:var(--text-sub); letter-spacing:1px;">順序</div>
+                                    <div style="font-size:2rem; font-weight:bold; color:white; font-family:monospace;" id="gate-seq-num">1</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid-2 mb-4">
+                            <button onclick="app.resetGateLock()" class="btn-secondary">重設</button>
+                            <button onclick="app.confirmGateSelection()" class="btn-neon">確認鎖定</button>
+                        </div>
+                        <div class="grid-4" id="gate-progress" style="grid-template-columns: repeat(7, 1fr); background:var(--bg-color); padding:10px; border-radius:8px; border:1px solid var(--border-color);"></div>
                     </div>`;
             },
             initGateLock() {
@@ -570,11 +725,10 @@
                 const start = (e) => { this.isDragging = true; e.preventDefault(); };
                 const move = (e) => {
                     if (!this.isDragging) return; e.preventDefault();
-                    const rect = container.getBoundingClientRect();
-                    const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
+                    const rect = container.getBoundingClientRect(); const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
                     const cx_t = e.touches ? e.touches[0].clientX : e.clientX; const cy_t = e.touches ? e.touches[0].clientY : e.clientY;
                     this.gateRotation = (Math.atan2(cy_t - cy, cx_t - cx) * (180 / Math.PI)) + 90;
-                    document.getElementById('gate-knob').style.transform = `rotate(${this.gateRotation}deg)`;
+                    document.getElementById('gate-knob').style.transform = `translate(-50%, -50%) rotate(${this.gateRotation}deg)`;
                 };
                 const end = (e) => {
                     if (!this.isDragging) return; this.isDragging = false;
@@ -582,20 +736,21 @@
                     this.gateRotation = Math.round(norm / step) * step;
                     const el = document.getElementById('gate-knob');
                     el.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                    el.style.transform = `rotate(${this.gateRotation}deg)`;
+                    el.style.transform = `translate(-50%, -50%) rotate(${this.gateRotation}deg)`;
                     setTimeout(() => { el.style.transition = 'none'; }, 300);
                 };
                 knob.addEventListener('mousedown', start); knob.addEventListener('touchstart', start);
                 window.addEventListener('mousemove', move); window.addEventListener('touchmove', move, { passive: false });
                 window.addEventListener('mouseup', end); window.addEventListener('touchend', end);
             },
-            resetGateLock() { this.state.gateLockIndex = 0; this.state.gateLockSequence = []; this.gateRotation = 0; document.getElementById('gate-knob').style.transform = `rotate(0deg)`; this.updateGateUI(); this.toast('密碼鎖已重置'); },
+            resetGateLock() { this.state.gateLockIndex = 0; this.state.gateLockSequence = []; this.gateRotation = 0; document.getElementById('gate-knob').style.transform = `translate(-50%, -50%) rotate(0deg)`; this.updateGateUI(); this.toast('密碼鎖已重置'); },
             confirmGateSelection() {
                 const letters = ['A','B','C','D','E','F','G']; 
                 let deg = this.gateRotation % 360; if (deg < 0) deg += 360;
-                this.state.gateLockSequence.push(letters[Math.round(deg / (360/7)) % 7]);
+                let index = Math.round(deg / (360/7)) % 7;
+                this.state.gateLockSequence.push(letters[index]);
                 this.state.gateLockIndex++;
-                if (this.state.gateLockIndex < 7) { this.updateGateUI(); const k = document.getElementById('gate-knob'); k.style.borderColor = '#d946ef'; setTimeout(() => k.style.borderColor = '#334155', 200); }
+                if (this.state.gateLockIndex < 7) { this.updateGateUI(); const k = document.getElementById('gate-knob'); k.style.borderColor = 'var(--accent-pink)'; setTimeout(() => k.style.borderColor = '#334155', 200); }
                 else { if (this.state.gateLockSequence.join('') === 'CEAGBDF') this.completeStage('gate'); else { this.toast('排序錯誤，系統重置'); this.resetGateLock(); } }
             },
             updateGateUI() {
@@ -607,25 +762,23 @@
                     for(let i=0; i<7; i++) {
                         const isLocked = i < this.state.gateLockIndex;
                         const cls = isLocked ? 'bg-fuchsia-600 text-white border-fuchsia-400' : 'bg-ntu-card text-slate-600 border-ntu-border';
-                        prog.innerHTML += `<div class="w-8 h-10 border ${cls} rounded flex items-center justify-center font-mono font-bold text-lg transition-all">${isLocked ? this.state.gateLockSequence[i] : '?'}</div>`;
+                        prog.innerHTML += `<div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:4px; font-weight:bold; background:${isLocked?'var(--accent-pink)':'var(--card-bg)'}; color:${isLocked?'white':'var(--text-sub)'}; border:1px solid ${isLocked?'var(--accent-pink)':'var(--border-color)'}">${isLocked ? this.state.gateLockSequence[i] : '?'}</div>`;
                     }
                 }
             },
 
-            // 1. 小木屋
             getWafflePuzzle() {
-                return `<div class="text-center mb-6"><div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-ntu-bg border border-ntu-border mb-3 shadow-lg"><i class="fa-solid fa-music text-2xl text-purple-400"></i></div><p class="text-sm text-slate-300">點擊播放按鈕，聆聽旋律中的音符（例如 Do=C），拼出對應的英文單字。</p></div><div class="space-y-4 mb-6">${['E,G,G','B,E,E,F','C,A,B,B,A,G,E'].map((n, i) => `<div class="bg-ntu-bg border border-ntu-border p-4 rounded flex items-center gap-3"><span class="text-purple-400 font-mono font-bold w-8">Q${i+1}</span><button onclick="app.playMelody(['${n.split(',').join("','")}'])" class="bg-purple-600 hover:bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-play text-xs"></i></button><input type="text" id="waffle-q${i+1}" class="term-input flex-1 p-1 text-center uppercase tracking-widest" placeholder="TYPE HERE"></div>`).join('')}</div><div class="flex justify-between items-center mb-6"><button onclick="app.playMelody(['C'])" class="text-xs text-slate-500 hover:text-white transition flex items-center gap-1"><i class="fa-regular fa-circle-play"></i> 試聽基準音 C (Do)</button></div><button onclick="app.checkWaffle()" class="w-full btn-neon py-3">提交驗證</button>`;
+                return `<div class="text-center mb-6"><div style="display:inline-flex; width:64px; height:64px; border-radius:50%; background:var(--bg-color); border:1px solid var(--border-color); align-items:center; justify-content:center; margin-bottom:12px; box-shadow:0 0 10px rgba(0,0,0,0.3);"><i class="fa-solid fa-music" style="color:var(--accent-pink); font-size:1.5rem;"></i></div><p class="text-sub">點擊播放按鈕，聆聽旋律中的音符（例如 Do=C），拼出對應的英文單字。</p></div><div class="mb-6" style="display:flex; flex-direction:column; gap:12px;">${['E,G,G','B,E,E,F','C,A,B,B,A,G,E'].map((n, i) => `<div style="background:var(--bg-color); border:1px solid var(--border-color); padding:12px; border-radius:8px; display:flex; align-items:center; gap:12px;"><span class="mono" style="color:var(--accent-pink); font-weight:bold;">Q${i+1}</span><button onclick="app.playMelody(['${n.split(',').join("','")}'])" style="background:#7c3aed; color:white; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-play" style="font-size:0.7rem;"></i></button><input type="text" id="waffle-q${i+1}" class="input-field" placeholder="TYPE HERE"></div>`).join('')}</div><div style="display:flex; justify-content:center; margin-bottom:20px;"><button onclick="app.playMelody(['C'])" style="background:none; border:none; color:var(--text-sub); font-size:0.8rem; cursor:pointer;"><i class="fa-regular fa-circle-play"></i> 試聽基準音 C (Do)</button></div><button onclick="app.checkWaffle()" class="btn-neon">提交驗證</button>`;
             },
             initWaffleEvents() {},
             checkWaffle() {
                 const ans = ['EGG','BEEF','CABBAGE']; let c = 0;
-                ans.forEach((a, i) => { const el = document.getElementById(`waffle-q${i+1}`); if(el.value.trim().toUpperCase() === a) c++; else { el.style.borderBottomColor = '#ef4444'; setTimeout(() => el.style.borderBottomColor = '#334155', 1000); } });
+                ans.forEach((a, i) => { const el = document.getElementById(`waffle-q${i+1}`); if(el.value.trim().toUpperCase() === a) c++; else { el.style.borderBottomColor = 'var(--danger)'; setTimeout(() => el.style.borderBottomColor = 'var(--border-color)', 1000); } });
                 if(c===3) this.completeStage('waffle'); else this.toast(`答對 ${c}/3 題`);
             },
 
-            // 6. 傅鐘
             getBellPuzzle() {
-                return `<div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4"><div class="text-left text-sm text-slate-300 mb-6 space-y-2 h-40 overflow-y-auto pr-2 custom-scrollbar border-l-2 border-slate-700 pl-3"><p class="font-bold text-white mb-2">事件紀錄：</p><ul class="list-disc list-inside text-slate-400 text-xs space-y-2 leading-relaxed"><li>環境氣溫：<span class="text-fuchsia-400">15°C</span></li><li>傅鐘：間隔 <span class="text-fuchsia-400">3秒</span>，共 <span class="text-fuchsia-400">21下</span></li><li>位置：距真傅鐘 <span class="text-fuchsia-400">1700m</span></li><li>干擾：假喇叭在中間，距奎哥近 <span class="text-fuchsia-400">200m</span> (1500m)</li><li>觀測：假鐘第一聲比真鐘早 <span class="text-fuchsia-400">12秒</span></li></ul></div><div class="space-y-4"><div class="relative"><label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q1 音速 v (m/s)</label><input type="number" id="bell-q1" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition"></div><div class="relative"><label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q2 假喇叭提早 (s)</label><input type="number" id="bell-q2" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition"></div><div class="relative"><label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q3 真正遲到倒數 (s)</label><input type="number" id="bell-q3" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition"></div></div></div><button onclick="app.checkBellAns()" class="w-full btn-neon py-3">提交驗證</button>`;
+                return `<div class="card text-center mb-4"><div class="custom-scrollbar" style="text-align:left; font-size:0.85rem; color:var(--text-sub); margin-bottom:20px; height:120px; overflow-y:auto; border-left:2px solid var(--border-color); padding-left:12px;"><p style="color:white; font-weight:bold; margin-bottom:8px;">事件紀錄：</p><ul style="list-style-type:disc; padding-left:20px; line-height:1.6;"><li>環境氣溫：<span class="text-accent">15°C</span></li><li>傅鐘：間隔 <span class="text-accent">3秒</span>，共 <span class="text-accent">21下</span></li><li>位置：距真傅鐘 <span class="text-accent">1700m</span></li><li>干擾：假喇叭在中間，距奎哥近 <span class="text-accent">200m</span> (1500m)</li><li>觀測：假鐘第一聲比真鐘早 <span class="text-accent">12秒</span></li></ul></div><div style="display:flex; flex-direction:column; gap:16px;"><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q1 音速 v (m/s)</label><input type="number" id="bell-q1" class="input-field"></div><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q2 假喇叭提早 (s)</label><input type="number" id="bell-q2" class="input-field"></div><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q3 真正遲到倒數 (s)</label><input type="number" id="bell-q3" class="input-field"></div></div></div><button onclick="app.checkBellAns()" class="btn-neon">提交驗證</button>`;
             },
             checkBellAns() {
                 const q1 = document.getElementById('bell-q1').value.trim(), q2 = document.getElementById('bell-q2').value.trim(), q3 = document.getElementById('bell-q3').value.trim();
@@ -633,9 +786,8 @@
                 if(c===3) this.completeStage('bell'); else this.toast(`答對 ${c}/3 題`);
             },
 
-            // 8. 總圖
             getLibraryPuzzle() {
-                return `<div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4"><div class="text-left text-sm text-slate-300 mb-6 space-y-2 border-l-2 border-slate-700 pl-3"><p class="font-bold text-white mb-2">觀測數據：</p><ul class="list-disc list-inside text-slate-400 text-xs space-y-2"><li>觀測點：總圖書館樓頂</li><li>目標A (正西)：圖資系館 <span class="text-fuchsia-400">俯角 10°</span></li><li>目標B (正南)：森林系館 <span class="text-fuchsia-400">俯角 8°</span></li></ul><div class="mt-4 p-2 bg-slate-800/50 rounded text-xs text-slate-500 flex items-center gap-2"><i class="fa-brands fa-google"></i> 提示：利用 Google Maps 測量地標距離</div></div><div class="space-y-4"><div class="relative"><label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q1 AB系館距離 (m)</label><input type="number" id="lib-q1" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition"></div><div class="relative"><label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q2 奎哥所在高度 (m)</label><input type="number" id="lib-q2" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition"></div></div></div><button onclick="app.checkLibraryAns()" class="w-full btn-neon py-3">提交驗證</button>`;
+                return `<div class="card text-center mb-4"><div style="text-align:left; font-size:0.85rem; color:var(--text-sub); margin-bottom:20px; border-left:2px solid var(--border-color); padding-left:12px;"><p style="color:white; font-weight:bold; margin-bottom:8px;">觀測數據：</p><ul style="list-style-type:disc; padding-left:20px; line-height:1.6;"><li>觀測點：總圖書館樓頂</li><li>目標A (正西)：圖資系館 <span class="text-accent">俯角 10°</span></li><li>目標B (正南)：森林系館 <span class="text-accent">俯角 8°</span></li></ul><div style="margin-top:12px; background:rgba(255,255,255,0.05); padding:8px; border-radius:4px; font-size:0.7rem;"><i class="fa-brands fa-google"></i> 提示：利用 Google Maps 測量地標距離</div></div><div style="display:flex; flex-direction:column; gap:16px;"><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q1 AB系館距離 (m)</label><input type="number" id="lib-q1" class="input-field"></div><div><label style="font-size:0.7rem; color:var(--text-sub); display:block; text-align:left; margin-bottom:4px;">Q2 奎哥所在高度 (m)</label><input type="number" id="lib-q2" class="input-field"></div></div></div><button onclick="app.checkLibraryAns()" class="btn-neon">提交驗證</button>`;
             },
             initLibraryEvents() {},
             checkLibraryAns() {
@@ -644,12 +796,11 @@
                 if(c===2) this.completeStage('library'); else this.toast(`答對 ${c}/2 題`);
             },
 
-            // 4. 公館
             getSubwayPuzzle() {
                 const opts = ['台北車站', '新店', '秀朗橋', '南勢角', '雙連', '忠孝復興', '龍山寺', '中和', '行天宮', '小碧潭'];
-                let h = `<div class="bg-ntu-bg border border-ntu-border p-4 rounded text-left mb-4"><p class="text-sm text-slate-300 mb-4 leading-relaxed"><span class="text-fuchsia-400 font-bold">租屋篩選條件：</span><br>1. 離學校(公館) 6 站捷運以內<br>2. 最多只需要換線 1 次</p><div class="grid grid-cols-2 gap-3">`;
-                opts.forEach(o => h += `<label class="flex items-center space-x-3 cursor-pointer bg-ntu-card p-3 rounded border border-ntu-border hover:border-fuchsia-400 transition select-none group"><input type="checkbox" name="subway-opt" value="${o}" class="form-checkbox h-4 w-4 text-fuchsia-400 rounded bg-slate-900 border-slate-600 focus:ring-0"><span class="text-xs text-slate-300 group-hover:text-white">${o}</span></label>`);
-                return h + `</div></div><button onclick="app.checkSubwayAns()" class="w-full btn-neon py-3">提交驗證</button>`;
+                let h = `<div class="card mb-4"><p class="text-sub" style="margin-bottom:16px; line-height:1.6;"><span class="text-accent" style="font-weight:bold;">租屋篩選條件：</span><br>1. 離學校(公館) 6 站捷運以內<br>2. 最多只需要換線 1 次</p><div class="grid-2">`;
+                opts.forEach(o => h += `<label class="checkbox-label"><input type="checkbox" name="subway-opt" value="${o}"><span style="font-size:0.8rem; color:var(--text-main);">${o}</span></label>`);
+                return h + `</div></div><button onclick="app.checkSubwayAns()" class="btn-neon">提交驗證</button>`;
             },
             checkSubwayAns() {
                 const corr = ['台北車站', '新店', '秀朗橋', '南勢角', '龍山寺', '行天宮', '小碧潭'].sort();
@@ -658,40 +809,45 @@
             },
 
             getLakePuzzle() {
-                return `<div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4"><i class="fa-solid fa-moon text-4xl text-ntu-yellow mb-4 drop-shadow-neon"></i><div class="text-left text-sm text-slate-300 mb-6 space-y-2"><p class="font-bold text-fuchsia-400 mb-2">光學觀測實驗報告：</p><div class="p-3 bg-ntu-card rounded border border-ntu-border space-y-2 text-xs mono mb-4"><p><span class="text-slate-500">觀測者(Object):</span> 李白 (N=1)</p><p><span class="text-slate-500">光源(Source):</span> 明月</p><p><span class="text-slate-500">反射介質(Medium):</span> 酒/地面</p><p><span class="text-slate-500">成像結果(Image):</span> 影子(Shadow) + 像(Reflection)</p></div><p class="leading-relaxed border-l-2 border-slate-700 pl-3">當光源照射物體，並經過介質反射後。觀測者聲稱系統中出現了<span class="text-fuchsia-400">「三個實體」</span>。</p><p class="mt-4 text-xs text-slate-400">請根據唐代學者李白的《光學觀測筆記》（原名：月下獨酌），輸入描述此物理現象結果的詩句（五個字）。</p></div><input type="text" id="ans-lake" placeholder="輸入五字詩句" class="term-input w-full p-2 text-center text-lg mb-2"></div><button onclick="app.checkAnswerText('lake', 'ans-lake', ['對影成三人'])" class="w-full btn-neon py-3">提交驗證</button>`;
+                return `<div class="card text-center mb-4"><i class="fa-solid fa-moon" style="font-size:2rem; color:var(--accent-yellow); margin-bottom:16px; display:block;"></i><div style="text-align:left; font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;"><p style="font-weight:bold; color:var(--accent-pink); margin-bottom:8px;">光學觀測實驗報告：</p><div style="background:var(--bg-color); padding:10px; border-radius:6px; border:1px solid var(--border-color); font-family:monospace; font-size:0.75rem; margin-bottom:12px;"><p>觀測者: 李白 (N=1)</p><p>光源: 明月</p><p>介質: 酒/地面</p><p>結果: 影子 + 像</p></div><p style="line-height:1.6; border-left:2px solid var(--border-color); padding-left:10px; margin-bottom:12px;">當光源照射物體，並經過介質反射後。觀測者聲稱系統中出現了<span class="text-accent">「三個實體」</span>。</p><p style="font-size:0.75rem;">請根據唐代學者李白的《光學觀測筆記》（原名：月下獨酌），輸入描述此物理現象結果的詩句（五個字）。</p></div><input type="text" id="ans-lake" placeholder="輸入五字詩句" class="input-field"></div><button onclick="app.checkAnswerText('lake', 'ans-lake', ['對影成三人'])" class="btn-neon">提交驗證</button>`;
             },
             getGymPuzzle() {
-                return `<div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4"><p class="text-sm text-slate-300 mb-4 text-left">修正方程式：$f(x) = x^3 - 3x + 1$。請計算此函數在 $x > 0$ 區域內的局部極小值是多少？</p><input type="text" id="ans-gym" placeholder="輸入數值" class="term-input w-full p-2 text-center text-lg"></div><button onclick="app.checkAnswer('gym', 'ans-gym', '-1')" class="w-full btn-neon py-3">提交驗證</button>`;
+                return `<div class="card text-center mb-4"><p class="text-sub" style="text-align:left; margin-bottom:16px;">修正方程式：$f(x) = x^3 - 3x + 1$。請計算此函數在 $x > 0$ 區域內的局部極小值是多少？</p><input type="text" id="ans-gym" placeholder="輸入數值" class="input-field"></div><button onclick="app.checkAnswer('gym', 'ans-gym', '-1')" class="btn-neon">提交驗證</button>`;
             },
-            highlightError(id) { const el = document.getElementById(id); el.classList.add('border-red-500'); setTimeout(()=>el.classList.remove('border-red-500'), 1000); },
+
+            highlightError(id) {
+                const el = document.getElementById(id);
+                el.style.borderBottomColor = 'var(--danger)'; 
+                setTimeout(() => el.style.borderBottomColor = 'var(--border-color)', 1000);
+            },
             checkAnswer(id, inp, ans) { const v = document.getElementById(inp).value.trim().toUpperCase(); if (v === ans.toString()) this.completeStage(id); else { this.toast('答案錯誤'); this.highlightError(inp); } },
             checkAnswerText(id, inp, anss) { const v = document.getElementById(inp).value.trim(); if (anss.includes(v)) this.completeStage(id); else { this.toast('答案錯誤'); this.highlightError(inp); } },
             completeStage(id) {
                 if (!this.state.completedStages.includes(id)) {
                     this.state.completedStages.push(id); this.saveProgress();
                     const c = STAGES[id].code;
-                    document.getElementById('app-container').innerHTML = `<div class="h-full flex flex-col items-center justify-center fade-in text-center"><div class="w-24 h-24 rounded-full bg-ntu-card border border-fuchsia-500 flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(217,70,239,0.5)]"><i class="fa-solid fa-unlock text-4xl text-white"></i></div><div class="text-fuchsia-400 text-sm font-mono tracking-widest mb-2">SYSTEM_UNLOCKED</div><h2 class="text-3xl font-bold text-white mb-4">解鎖成功</h2><div class="bg-ntu-bg border border-ntu-border rounded p-4 mb-8"><div class="text-xs text-slate-500 mb-1">獲得金鑰碎片</div><div class="text-4xl font-mono font-bold text-white">${c}</div></div><button onclick="app.navigate('mission')" class="px-8 py-3 bg-slate-700 hover:bg-slate-600 rounded text-white font-bold transition">前往下一站</button></div>`;
+                    document.getElementById('app-container').innerHTML = `<div class="intro-container fade-in"><div style="width:80px; height:80px; border-radius:50%; background:var(--card-bg); border:1px solid var(--accent-pink); display:flex; align-items:center; justify-content:center; margin-bottom:20px; box-shadow:0 0 20px rgba(217,70,239,0.3);"><i class="fa-solid fa-unlock" style="font-size:2rem; color:white;"></i></div><div class="mono" style="color:var(--accent-pink); font-size:0.8rem; letter-spacing:2px; margin-bottom:8px;">SYSTEM_UNLOCKED</div><h2 style="font-size:1.8rem; font-weight:bold; color:white; margin-bottom:20px;">解鎖成功</h2><div style="background:var(--bg-color); border:1px solid var(--border-color); padding:20px; border-radius:8px; margin-bottom:30px;"><div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:8px;">獲得金鑰碎片</div><div class="mono" style="font-size:2.5rem; font-weight:bold; color:white;">${c}</div></div><button onclick="app.navigate('mission')" class="btn-secondary">前往下一站</button></div>`;
                 } else this.render();
             },
             renderClues(container) {
                 const route = TEAM_ROUTES[this.state.teamId];
-                let html = `<div class="mb-6 flex items-center justify-between border-l-4 border-fuchsia-500 pl-3"><h2 class="text-xl font-bold text-white">資料庫碎片</h2><span class="text-xs text-slate-500 font-mono">DB_STATUS: ${this.state.completedStages.length}/${route.length}</span></div><div class="grid grid-cols-2 gap-3">`;
+                let html = `<div class="section-title"><h2>資料庫碎片</h2><span class="mono" style="font-size:0.7rem; color:var(--text-sub);">DB_STATUS: ${this.state.completedStages.length}/${route.length}</span></div><div class="grid-2">`;
                 route.forEach(k => {
                     const s = STAGES[k]; const u = this.state.completedStages.includes(k);
-                    html += `<div class="ntu-card aspect-square flex flex-col items-center justify-center relative group transition hover:border-fuchsia-500/50">${u ? `<span class="text-5xl font-bold text-fuchsia-400 font-mono mb-2 drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]">${s.code}</span><span class="text-xs text-slate-400">${s.name}</span>` : `<i class="fa-solid fa-lock text-3xl text-slate-700 mb-2"></i><span class="text-xs text-slate-700 font-mono">LOCKED</span>`}</div>`;
+                    html += `<div class="card" style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0; padding:0; border-color:${u?'var(--accent-pink)':'var(--border-color)'}; box-shadow:${u?'0 0 10px rgba(217,70,239,0.2)':'none'};">${u ? `<span class="mono" style="font-size:2.5rem; font-weight:bold; color:var(--accent-pink); margin-bottom:8px;">${s.code}</span><span style="font-size:0.7rem; color:var(--text-sub);">${s.name}</span>` : `<i class="fa-solid fa-lock" style="font-size:1.5rem; color:var(--border-color); margin-bottom:8px;"></i><span class="mono" style="font-size:0.7rem; color:var(--border-color);">LOCKED</span>`}</div>`;
                 });
                 container.innerHTML = html + `</div>`;
             },
             renderFinal(container) {
                 const ok = this.state.completedStages.length === TEAM_ROUTES[this.state.teamId].length;
-                container.innerHTML = `<div class="mb-6 border-l-4 border-red-500 pl-3"><h2 class="text-xl font-bold text-white">終端核心</h2><div class="text-xs text-red-400 mt-1">ACCESS_LEVEL: ADMIN</div></div><div class="ntu-card p-8 text-center" id="final-card"><div class="mb-6 relative inline-block"><i class="fa-solid fa-shield-halved text-6xl ${ok?'text-red-500 animate-pulse':'text-slate-700'}"></i>${ok ? '<div class="absolute inset-0 bg-red-500 blur-xl opacity-20 animate-pulse"></div>' : ''}</div><p class="text-sm text-slate-400 mb-6 font-mono">請輸入完整的「智慧之鑰」代碼以解鎖系統核心。</p><div class="flex items-center justify-center gap-2 mb-6"><input type="text" id="final-part1" class="w-24 bg-ntu-bg border-2 border-slate-600 rounded p-3 text-center font-mono text-xl tracking-widest text-white focus:border-red-500 outline-none uppercase transition" maxlength="4" ${!ok?'disabled':''}><span class="text-slate-500 text-2xl font-mono">_</span><input type="text" id="final-part2" class="w-24 bg-ntu-bg border-2 border-slate-600 rounded p-3 text-center font-mono text-xl tracking-widest text-white focus:border-red-500 outline-none uppercase transition" maxlength="4" ${!ok?'disabled':''}></div>${!ok ? `<div class="flex items-center justify-center gap-2 text-xs text-red-400 bg-red-500/10 p-2 rounded border border-red-500/20"><i class="fa-solid fa-lock"></i> 存取被拒：需先完成所有任務</div>` : `<button onclick="app.checkFinal()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded shadow-[0_0_15px_rgba(220,38,38,0.5)] transition active:scale-95">執行解密程序</button>`}</div>`;
+                container.innerHTML = `<div class="section-title" style="border-left-color:var(--danger);"><h2>終端核心</h2><span class="mono" style="font-size:0.7rem; color:var(--danger);">ACCESS_LEVEL: ADMIN</span></div><div class="card text-center" style="padding:30px;"><div style="margin-bottom:20px; display:inline-block;"><i class="fa-solid fa-shield-halved" style="font-size:3rem; color:${ok? 'var(--danger)':'var(--border-color)'};"></i></div><p class="text-sub mb-4">請輸入完整的「智慧之鑰」代碼以解鎖系統核心。</p><div style="display:flex; justify-content:center; gap:8px; margin-bottom:24px;"><input type="text" id="final-part1" class="input-field" style="width:80px;" maxlength="4" ${!ok?'disabled':''}><span class="mono" style="font-size:1.5rem; color:var(--text-sub);">_</span><input type="text" id="final-part2" class="input-field" style="width:80px;" maxlength="4" ${!ok?'disabled':''}></div>${!ok ? `<div style="font-size:0.75rem; color:var(--danger); background:rgba(239,68,68,0.1); padding:8px; border-radius:4px; border:1px solid rgba(239,68,68,0.2);"><i class="fa-solid fa-lock"></i> 存取被拒：需先完成所有任務</div>` : `<button onclick="app.checkFinal()" class="btn-neon" style="background:var(--danger); box-shadow:0 0 15px rgba(239,68,68,0.4);">執行解密程序</button>`}</div>`;
             },
             checkFinal() {
                 try {
                     const p1 = document.getElementById('final-part1').value.trim().toUpperCase(); const p2 = document.getElementById('final-part2').value.trim().toUpperCase(); const input = `${p1}_${p2}`;
                     if (btoa(input) === FINAL_ANSWER_HASH) {
                         const container = document.getElementById('app-container');
-                        container.innerHTML = `<div class="h-full flex flex-col items-center justify-center fade-in px-4"><div class="w-full max-w-sm bg-ntu-bg border-2 border-emerald-500 rounded-lg p-8 text-center shadow-[0_0_20px_rgba(16,185,129,0.3)] relative overflow-hidden"><div class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"><i class="fa-solid fa-check text-3xl text-ntu-bg"></i></div><h2 class="text-3xl font-bold text-white mb-2 tracking-wide">ACCESS GRANTED</h2><div class="space-y-2 mb-8"><p class="text-slate-300">恭喜獲得智慧之鑰！</p><p class="text-slate-300">請截圖此畫面領取獎勵。</p></div><div class="h-px w-full bg-emerald-500/30 mb-6"></div><div class="font-mono text-emerald-500 text-sm tracking-widest">HASH: ${Date.now().toString(16).toUpperCase()}</div></div></div>`;
+                        container.innerHTML = `<div class="intro-container fade-in"><div style="width:100%; max-width:320px; background:var(--bg-color); border:2px solid var(--success); border-radius:12px; padding:30px; text-align:center; box-shadow:0 0 30px rgba(16,185,129,0.2);"><div style="width:60px; height:60px; background:var(--success); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;"><i class="fa-solid fa-check" style="font-size:1.5rem; color:var(--bg-color);"></i></div><h2 style="font-size:1.5rem; font-weight:bold; color:white; margin-bottom:10px; letter-spacing:1px;">ACCESS GRANTED</h2><div style="font-size:0.9rem; color:var(--text-sub); margin-bottom:24px; line-height:1.5;"><p>恭喜獲得智慧之鑰！</p><p>請截圖此畫面領取獎勵。</p></div><div style="height:1px; background:rgba(16,185,129,0.3); width:100%; margin-bottom:20px;"></div><div class="mono" style="color:var(--success); font-size:0.8rem; letter-spacing:2px;">HASH: ${Date.now().toString(16).toUpperCase()}</div></div></div>`;
                         this.toast('解密成功！');
                     } else { this.toast('代碼錯誤 (ACCESS DENIED)'); }
                 } catch(e) { this.toast('格式錯誤'); }
