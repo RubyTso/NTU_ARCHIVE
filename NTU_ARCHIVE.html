@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 移除所有 CSP 限制，確保最寬鬆的執行環境 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
     
     <title>Project: NTU_LEGACY | 台大實境解謎</title>
     <link rel="icon" type="image/png" href="images/logo.png">
@@ -15,16 +16,16 @@
     <style>
         /* --- 0. 核心變數 (Cyberpunk Theme) --- */
         :root {
-            --bg-color: #0b1121;
-            --card-bg: #151e32;
-            --border-color: #334155;
-            --text-main: #e2e8f0;
-            --text-sub: #94a3b8;
-            --accent-cyan: #38bdf8;
-            --accent-pink: #d946ef;
-            --accent-yellow: #fbbf24;
-            --danger: #ef4444;
-            --success: #10b981;
+            --bg-color: #0b1121;       /* 深午夜藍 */
+            --card-bg: #151e32;        /* 卡片背景 */
+            --border-color: #334155;   /* 邊框色 */
+            --text-main: #e2e8f0;      /* 主要文字 */
+            --text-sub: #94a3b8;       /* 次要文字 */
+            --accent-cyan: #38bdf8;    /* 亮藍 */
+            --accent-pink: #d946ef;    /* 霓虹粉 */
+            --accent-yellow: #fbbf24;  /* 琥珀黃 */
+            --danger: #ef4444;         /* 紅色警告 */
+            --success: #10b981;        /* 綠色成功 */
             
             /* Tailwind Slate Colors for manual mapping */
             --slate-300: #cbd5e1;
@@ -49,7 +50,7 @@
             touch-action: manipulation;
         }
 
-        /* --- 2. 實用類別 (手動模擬 Tailwind，解決樣式遺失問題) --- */
+        /* --- 2. 實用類別 --- */
         .w-full { width: 100%; }
         .h-full { height: 100%; }
         .flex { display: flex; }
@@ -193,7 +194,7 @@
             font-size: 1rem; cursor: pointer;
             box-shadow: 0 0 15px rgba(217, 70, 239, 0.4);
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-neon:active { transform: scale(0.98); }
@@ -277,16 +278,9 @@
         }
         .logo-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        .scanline {
-            width: 100%; height: 100px; position: fixed; bottom: 100%; left: 0; z-index: 1; pointer-events: none;
-            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(56, 189, 248, 0.03) 50%, rgba(0,0,0,0) 100%);
-            animation: scanline 8s linear infinite;
-        }
-        .neon-glow {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
-            background: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
-                        radial-gradient(circle at 90% 80%, rgba(217, 70, 239, 0.05) 0%, transparent 40%);
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
     </style>
 </head>
 <body>
@@ -444,6 +438,7 @@
                 }
             },
 
+            // --- 核心邏輯 ---
             initAudio() {
                 if(!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if(this.audioCtx.state === 'suspended') this.audioCtx.resume();
@@ -544,6 +539,7 @@
                 }
             },
 
+            // --- 渲染 ---
             render() {
                 const container = document.getElementById('app-container');
                 if(!container) return;
@@ -679,6 +675,15 @@
                 );
             },
             
+            requestAdminSkip(id) {
+                const code = prompt("輸入救援碼：");
+                if (code === ADMIN_PASS) {
+                    this.forceArrive(id);
+                } else if(code !== null) {
+                    alert("密碼錯誤");
+                }
+            },
+
             forceArrive(id) {
                 if (!this.state.arrivedStages.includes(id)) {
                     this.state.arrivedStages.push(id);
