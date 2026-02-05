@@ -1,715 +1,1153 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Project: NTU_LEGACY | 台大實境解謎</title>
+    <!-- 設定網頁 Favicon (瀏覽器分頁圖示) -->
+    <link rel="icon" type="image/png" href="images/logo.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <title>Project: NTU_LEGACY | 台大實境解謎</title>
-  <link rel="icon" type="image/png" href="images/logo.png" />
-
-  <!-- 引入字體與圖標 -->
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-  <style>
-    /* --- 0. 核心變數 (Cyberpunk Theme) --- */
-    :root {
-      --bg-color: #0b1121;
-      --card-bg: #151e32;
-      --border-color: #334155;
-      --text-main: #e2e8f0;
-      --text-sub: #94a3b8;
-      --accent-cyan: #38bdf8;
-      --accent-pink: #d946ef;
-      --accent-yellow: #fbbf24;
-      --danger: #ef4444;
-      --success: #10b981;
-
-      --slate-300: #cbd5e1;
-      --slate-400: #94a3b8;
-      --slate-500: #64748b;
-      --slate-600: #475569;
-      --slate-700: #334155;
-      --slate-800: #1e293b;
-      --slate-900: #0f172a;
-    }
-
-    /* --- 1. 全局設定 --- */
-    * { box-sizing: border-box; }
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: 'Noto Sans TC', sans-serif;
-      margin: 0; padding: 0;
-      height: 100vh;
-      display: flex; flex-direction: column;
-      overflow: hidden;
-      touch-action: manipulation;
-    }
-
-    /* ✅ 補齊：scanline / neon-glow（你有用到但沒定義） */
-    .scanline{
-      pointer-events:none;
-      position:fixed; inset:0;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.03) 0px,
-        rgba(255,255,255,0.03) 1px,
-        rgba(0,0,0,0) 3px,
-        rgba(0,0,0,0) 6px
-      );
-      mix-blend-mode: overlay;
-      opacity: 0.25;
-      z-index: 1;
-    }
-    .neon-glow{
-      pointer-events:none;
-      position:fixed; inset:-40px;
-      background: radial-gradient(circle at 50% 30%, rgba(217,70,239,0.15), transparent 55%),
-                  radial-gradient(circle at 20% 80%, rgba(56,189,248,0.12), transparent 55%);
-      filter: blur(12px);
-      z-index: 1;
-    }
-
-    /* --- 2. 實用類別 --- */
-    .w-full { width: 100%; }
-    .h-full { height: 100%; }
-    .flex { display: flex; }
-    .flex-col { flex-direction: column; }
-    .items-center { align-items: center; }
-    .justify-center { justify-content: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-1 { gap: 4px; }
-    .gap-2 { gap: 8px; }
-    .gap-3 { gap: 12px; }
-    .gap-4 { gap: 16px; }
-    .text-center { text-align: center; }
-    .text-left { text-align: left; }
-    .relative { position: relative; }
-    .absolute { position: absolute; }
-    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-    .z-10 { z-index: 10; }
-    .z-20 { z-index: 20; }
-    .hidden { display: none !important; }
-    .block { display: block; }
-    .inline-block { display: inline-block; }
-    .inline-flex { display: inline-flex; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    .font-bold { font-weight: bold; }
-    .tracking-widest { letter-spacing: 0.1em; }
-    .leading-relaxed { line-height: 1.625; }
-
-    .text-white { color: white; }
-    .text-slate-300 { color: var(--slate-300); }
-    .text-slate-400 { color: var(--slate-400); }
-    .text-slate-500 { color: var(--slate-500); }
-    .text-ntu-accent { color: var(--accent-cyan); }
-    .text-fuchsia-400 { color: var(--accent-pink); }
-    .text-emerald-400 { color: #34d399; }
-    .text-emerald-500 { color: var(--success); }
-    .text-red-400 { color: #f87171; }
-    .text-red-500 { color: var(--danger); }
-    .text-ntu-yellow { color: var(--accent-yellow); }
-
-    .bg-ntu-bg { background-color: var(--bg-color); }
-    .bg-ntu-card { background-color: var(--card-bg); }
-    .bg-slate-800 { background-color: var(--slate-800); }
-    .bg-slate-900 { background-color: var(--slate-900); }
-    .bg-fuchsia-500 { background-color: var(--accent-pink); }
-    .bg-emerald-500 { background-color: var(--success); }
-    .bg-red-600 { background-color: #dc2626; }
-    .bg-transparent { background-color: transparent; }
-
-    .border { border-width: 1px; border-style: solid; }
-    .border-2 { border-width: 2px; border-style: solid; }
-    .border-4 { border-width: 4px; border-style: solid; }
-    .border-ntu-border { border-color: var(--border-color); }
-    .border-slate-600 { border-color: var(--slate-600); }
-    .border-slate-700 { border-color: var(--slate-700); }
-    .border-fuchsia-500 { border-color: var(--accent-pink); }
-    .border-emerald-500 { border-color: var(--success); }
-    .border-red-500 { border-color: var(--danger); }
-
-    .border-l-4 { border-left-width: 4px; border-style: solid; }
-    .border-l-2 { border-left-width: 2px; border-style: solid; }
-    .border-t { border-top-width: 1px; border-style: solid; }
-    .border-b { border-bottom-width: 1px; border-style: solid; }
-
-    .rounded { border-radius: 0.25rem; }
-    .rounded-lg { border-radius: 0.5rem; }
-    .rounded-full { border-radius: 9999px; }
-
-    .p-2 { padding: 0.5rem; }
-    .p-3 { padding: 0.75rem; }
-    .p-4 { padding: 1rem; }
-    .p-8 { padding: 2rem; }
-    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-    .px-8 { padding-left: 2rem; padding-right: 2rem; }
-    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-    .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-    .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-    .mb-2 { margin-bottom: 0.5rem; }
-    .mb-3 { margin-bottom: 0.75rem; }
-    .mb-4 { margin-bottom: 1rem; }
-    .mb-6 { margin-bottom: 1.5rem; }
-    .mb-8 { margin-bottom: 2rem; }
-    .mt-1 { margin-top: 0.25rem; }
-    .mt-2 { margin-top: 0.5rem; }
-    .mt-3 { margin-top: 0.75rem; }
-    .mt-4 { margin-top: 1rem; }
-    .mr-1 { margin-right: 0.25rem; }
-    .mr-2 { margin-right: 0.5rem; }
-    .pl-3 { padding-left: 0.75rem; }
-    .pt-6 { padding-top: 1.5rem; }
-    .pb-3 { padding-bottom: 0.75rem; }
-
-    .grid { display: grid; }
-    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .overflow-hidden { overflow: hidden; }
-    .object-cover { object-fit: cover; }
-    .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
-    .shadow-neon { box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
-    .fade-in { animation: fadeIn 0.5s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* ✅ 補齊：你有用到但沒定義的 UI class，避免「看起來像空白」 */
-    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .card{
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
-      margin-bottom: 16px;
-    }
-    .section-title{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      padding: 10px 12px;
-      margin-bottom: 12px;
-      border-left: 4px solid var(--accent-pink);
-      background: rgba(255,255,255,0.03);
-      border-radius: 10px;
-    }
-    .section-title h2{
-      margin: 2px 0 0 0;
-      font-size: 1.2rem;
-      color: white;
-    }
-    .img-container{
-      width:100%;
-      border-radius: 10px;
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,0.06);
-      margin-bottom: 12px;
-      background: rgba(0,0,0,0.2);
-    }
-    .img-cover{ width:100%; height: 200px; object-fit: cover; display:block; }
-    .text-sub{ color: var(--text-sub); }
-
-    /* --- 3. 主要版面區塊 --- */
-    header {
-      position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-      background: rgba(11, 17, 33, 0.95); backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border-color);
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0 16px; z-index: 50;
-    }
-
-    /* ✅ 補齊：team badge / reset btn（你有用到但沒定義） */
-    .team-badge{
-      padding: 6px 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 999px;
-      color: var(--text-sub);
-      font-size: 0.8rem;
-      margin-right: 10px;
-    }
-    .reset-btn{
-      background: rgba(239,68,68,0.1);
-      color: #fecaca;
-      border: 1px solid rgba(239,68,68,0.35);
-      border-radius: 10px;
-      padding: 8px 10px;
-      cursor: pointer;
-    }
-    .header-controls{ display:flex; align-items:center; gap:10px; }
-
-    main {
-      flex: 1; width: 100%; max-width: 480px; margin: 0 auto;
-      padding: 80px 16px 100px 16px;
-      overflow-y: auto; position: relative; z-index: 10;
-    }
-
-    nav {
-      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 100%; max-width: 480px; height: 70px;
-      background: var(--bg-color); border-top: 1px solid var(--border-color);
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      z-index: 50; box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
-    }
-    nav button {
-      background: none; border: none; color: var(--text-sub);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 4px; font-size: 0.7rem; cursor: pointer; transition: color 0.3s;
-    }
-    nav button i { font-size: 1.4rem; margin-bottom: 2px; }
-    nav button.active { color: var(--accent-pink); text-shadow: 0 0 10px rgba(217, 70, 239, 0.3); }
-
-    /* --- 4. 按鈕、輸入框、轉盤 --- */
-    .btn-neon {
-      width: 100%; padding: 14px;
-      background: linear-gradient(90deg, #d946ef 0%, #7c3aed 100%);
-      color: white; font-weight: bold; border: none; border-radius: 8px;
-      font-size: 1rem; cursor: pointer;
-      box-shadow: 0 0 15px rgba(217, 70, 239, 0.4);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-neon:active { transform: scale(0.98); }
-
-    .btn-secondary {
-      width: 100%; padding: 12px;
-      background: transparent; border: 1px solid var(--border-color);
-      color: var(--text-sub); border-radius: 8px; font-weight: bold;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .btn-secondary:hover { border-color: var(--text-sub); color: white; background: rgba(255,255,255,0.05); }
-
-    .term-input {
-      width: 100%; background: rgba(0,0,0,0.2); border: none;
-      border-bottom: 2px solid var(--border-color);
-      color: var(--accent-pink); font-size: 1.2rem; text-align: center;
-      padding: 10px; outline: none; font-family: 'JetBrains Mono', monospace;
-      text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
-    }
-    .term-input:focus { border-bottom-color: var(--accent-pink); background: rgba(217, 70, 239, 0.05); }
-
-    /* Dial Puzzle (原樣保留) */
-    .dial-wrapper {
-      position: relative; width: 260px; height: 260px; margin: 20px auto;
-      border-radius: 50%; background: linear-gradient(145deg, #1a233a, #0f1623);
-      border: 10px solid var(--border-color);
-      box-shadow: inset 0 0 20px #000; user-select: none;
-    }
-    .dial-track {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 170px; height: 170px; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.05); pointer-events: none;
-    }
-    .dial-knob {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 160px; height: 160px; border-radius: 50%;
-      background: var(--card-bg); border: 1px solid #334155;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 10; cursor: grab;
-    }
-    .dial-pointer {
-      position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-      width: 0; height: 0;
-      border-left: 10px solid transparent; border-right: 10px solid transparent;
-      border-bottom: 18px solid var(--accent-yellow);
-    }
-    .dial-letter {
-      position: absolute; width: 30px; height: 30px;
-      text-align: center; line-height: 30px; color: var(--text-sub);
-      font-weight: bold; font-family: 'JetBrains Mono', monospace;
-      pointer-events: none; transform-origin: center center; font-size: 1.2rem;
-    }
-
-    /* Checkbox */
-    .checkbox-group label {
-      display: flex; align-items: center; padding: 12px;
-      background: rgba(0,0,0,0.2); border: 1px solid var(--border-color);
-      border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;
-    }
-    .checkbox-group label:hover { border-color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
-    .checkbox-group input { margin-right: 12px; width: 18px; height: 18px; accent-color: var(--accent-cyan); cursor: pointer; }
-
-    /* Toast */
-    #toast {
-      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-      background: #1e293b; border: 1px solid var(--accent-pink); color: white;
-      padding: 12px 24px; border-radius: 8px; z-index: 100;
-      opacity: 0; transition: opacity 0.3s; pointer-events: none;
-      display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      width: max-content;
-    }
-    #toast.show { opacity: 1; }
-
-    /* Intro */
-    .intro-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%; text-align: center; }
-    .logo-box {
-      width: 120px; height: 120px; border-radius: 50%; overflow: hidden;
-      border: 4px solid rgba(217, 70, 239, 0.5);
-      box-shadow: 0 0 20px rgba(217, 70, 239, 0.3); margin-bottom: 20px;
-    }
-    .logo-box img { width: 100%; height: 100%; object-fit: cover; }
-  </style>
-</head>
-
-<body>
-  <div class="scanline"></div>
-  <div class="neon-glow"></div>
-
-  <header>
-    <div class="header-logo">
-      <span style="color:var(--accent-pink)">&gt;_</span>
-      <span class="mono" style="color:white; letter-spacing: 2px;">NTU_SYSTEM</span>
-    </div>
-    <div class="header-controls">
-      <div id="team-display" class="team-badge"></div>
-      <button onclick="app.resetGame()" class="reset-btn">
-        <i class="fa-solid fa-triangle-exclamation"></i> 重置
-      </button>
-    </div>
-  </header>
-
-  <main id="app-container"></main>
-
-  <nav>
-    <button onclick="app.navigate('mission')" id="nav-mission">
-      <i class="fa-solid fa-location-arrow"></i> <span class="mono">當前任務</span>
-    </button>
-    <button onclick="app.navigate('clues')" id="nav-clues">
-      <i class="fa-solid fa-key"></i> <span class="mono">金鑰碎片</span>
-    </button>
-    <button onclick="app.navigate('final')" id="nav-final">
-      <i class="fa-solid fa-lock"></i> <span class="mono">終端解碼</span>
-    </button>
-  </nav>
-
-  <div id="toast">
-    <i class="fa-solid fa-circle-info"></i> <span id="toast-msg">Message</span>
-  </div>
-
-  <script>
-    const ADMIN_PASS = '8888';
-    const FINAL_ANSWER_HASH = "REVMQ18yMDIy";
-
-    const STAGES = {
-      gate: { id:'gate', name:'台大校門', code:'2', lat:25.0174, lon:121.5339, hintTitle:'知識的入口', hintDesc:'所有旅程的起點，昔日的帝國大學門戶。', hintImage:'images/gate.jpg', icon:'fa-torii-gate', title:'時光刻度', desc:'請轉動圓盤，依發生年代將校史事件排序。', difficultyLabel:'歷史排序', type:'lock' },
-      palm: { id:'palm', name:'椰林大道', code:'2', lat:25.0185, lon:121.5390, hintTitle:'熱帶的守望者', hintDesc:'筆直的大道，兩旁高聳的植物見證了無數學子的來去。', hintImage:'images/palm.jpg', icon:'fa-tree', title:'光譜密碼', desc:'尋找隱藏在椰林光影中的「台大紅」。請根據數學線索調配出正確的 RGB 數值。', difficultyLabel:'色彩數學', type:'color' },
-      bell: { id:'bell', name:'傅鐘', code:'2', lat:25.0180, lon:121.5385, hintTitle:'時間的警鐘', hintDesc:'為了紀念一位偉大的校長，這裡的鐘聲總是敲響21下。', hintImage:'images/bell.jpg', icon:'fa-bell', title:'聲速奧秘', desc:'分辨真假傅鐘的聲響，計算音速與時間差。', difficultyLabel:'物理數學', type:'physics' },
-      gym: { id:'gym', name:'舊體育館', code:'D', lat:25.0222, lon:121.5369, hintTitle:'古典競技場', hintDesc:'校園中最古老的體育建築，門口的羅馬柱是其特徵。', hintImage:'images/gym.jpg', icon:'fa-dumbbell', title:'函數極值', desc:'彈道軌跡隱藏在古老的建築結構中。尋找三次函數的局部最低點。', difficultyLabel:'數學微積分', type:'math' },
-      lake: { id:'lake', name:'醉月湖', code:'L', lat:25.0210, lon:121.5370, hintTitle:'詩人的倒影', hintDesc:'校園中的一抹碧波，湖心亭是其標誌。', hintImage:'images/lake.jpg', icon:'fa-water', title:'光學推演', desc:'分析場景中的物理條件（光源、反射介質），推導出李白觀測到的光學成像結果。', difficultyLabel:'物理文學', type:'literature' },
-      library: { id:'library', name:'總圖書館', code:'C', lat:25.01734, lon:121.54056, hintTitle:'知識的堡壘', hintDesc:'校園的幾何中心，保存著百萬藏書的宏偉建築。', hintImage:'images/library.jpg', icon:'fa-book', title:'三角測量', desc:'利用俯角觀測數據，計算建築物的距離與高度。', difficultyLabel:'數學幾何', type:'math' },
-      waffle: { id:'waffle', name:'小木屋', code:'0', lat:25.0195, lon:121.5408, hintTitle:'甜蜜的角落', hintDesc:'排隊人潮總是絡繹不絕，空氣中飄散著鬆餅的香氣。', hintImage:'images/waffle.jpg', icon:'fa-utensils', title:'音律食材', desc:'美味秘密藏在旋律裡。聆聽音符辨識音名，拼出英文食材單字。', difficultyLabel:'音樂聽寫', type:'music' },
-      subway: { id:'subway', name:'公館捷運', code:'E', lat:25.0155, lon:121.5340, hintTitle:'地下的脈動', hintDesc:'校園旁的交通樞紐，四通八達的捷運路網。', hintImage:'images/subway.jpg', icon:'fa-train-subway', title:'捷運租屋', desc:'奎哥想在學校附近租屋。請協助他篩選符合通勤條件的捷運站。', difficultyLabel:'生活地理', type:'checkbox' }
-    };
-
-    const TEAM_ROUTES = {
-      1: ['gate','palm','bell','gym','lake','library','waffle','subway'],
-      2: ['bell','gym','lake','library','waffle','subway','gate','palm'],
-      3: ['gym','lake','library','waffle','subway','gate','palm','bell'],
-      4: ['subway','gate','palm','bell','gym','lake','library','waffle'],
-      5: ['waffle','subway','gate','palm','bell','gym','lake','library'],
-      6: ['library','waffle','subway','gate','palm','bell','gym','lake'],
-      7: ['lake','library','waffle','subway','gate','palm','bell','gym'],
-      8: ['palm','bell','gym','lake','library','waffle','subway','gate']
-    };
-
-    const app = {
-      state: {
-        teamId: null,
-        completedStages: [],
-        arrivedStages: [],
-        stageScores: {}, stageStartTimes: {},
-        currentView: 'intro',
-        gateLockIndex: 0, gateLockSequence: []
-      },
-
-      audioCtx: null,
-      noteFreqs: { C:261.63, D:293.66, E:329.63, F:349.23, G:392.00, A:440.00, B:493.88 },
-
-      init() {
-        try {
-          this.loadProgress();
-          this.render();
-        } catch(e) {
-          console.error(e);
-          alert("Init Error: " + e);
-        }
-      },
-
-      initAudio() {
-        if(!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if(this.audioCtx.state === 'suspended') this.audioCtx.resume();
-      },
-
-      playMelody(notes) {
-        this.initAudio();
-        const now = this.audioCtx.currentTime;
-        notes.forEach((n, i) => {
-          if(!this.noteFreqs[n]) return;
-          const osc = this.audioCtx.createOscillator();
-          const gain = this.audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.value = this.noteFreqs[n];
-          osc.connect(gain);
-          gain.connect(this.audioCtx.destination);
-          gain.gain.setValueAtTime(0, now + i * 0.6);
-          gain.gain.linearRampToValueAtTime(0.3, now + i * 0.6 + 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.6 + 0.5);
-          osc.start(now + i * 0.6);
-          osc.stop(now + i * 0.6 + 0.5);
-        });
-      },
-
-      loadProgress() {
-        const team = localStorage.getItem('ntu_puzzle_team');
-        const c = localStorage.getItem('ntu_puzzle_completed');
-        const a = localStorage.getItem('ntu_puzzle_arrived');
-
-        if (team) {
-          this.state.teamId = parseInt(team, 10);
-          if (c) this.state.completedStages = JSON.parse(c);
-          if (a) this.state.arrivedStages = JSON.parse(a);
-          this.state.currentView = 'mission';
-        }
-      },
-
-      saveProgress() {
-        if(this.state.teamId) localStorage.setItem('ntu_puzzle_team', this.state.teamId);
-        localStorage.setItem('ntu_puzzle_completed', JSON.stringify(this.state.completedStages));
-        localStorage.setItem('ntu_puzzle_arrived', JSON.stringify(this.state.arrivedStages));
-        this.updateUI();
-      },
-
-      updateUI() {
-        if(this.state.teamId) {
-          const el = document.getElementById('team-display');
-          if(el) el.textContent = '小隊 ' + this.state.teamId;
-        }
-        ['mission','clues','final'].forEach(view => {
-          const btn = document.getElementById('nav-' + view);
-          if(btn) btn.classList.toggle('active', view === this.state.currentView);
-        });
-      },
-
-      setTeam(id) {
-        this.state.teamId = id;
-        this.saveProgress();
-        this.navigate('mission');
-      },
-
-      navigate(view) {
-        this.state.currentView = view;
-        this.state.gateLockIndex = 0;
-        this.state.gateLockSequence = [];
-        this.render();
-      },
-
-      resetGame() {
-        if(confirm('確定要重置所有進度嗎？(將清除小隊設定)')) {
-          localStorage.clear();
-          location.reload();
-        }
-      },
-
-      toast(msg) {
-        const t = document.getElementById('toast');
-        if(!t) return;
-        document.getElementById('toast-msg').textContent = msg;
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 3000);
-      },
-
-      requestAdminSkip(id) {
-        const code = prompt("輸入救援碼：");
-        if (code === ADMIN_PASS) {
-          this.forceArrive(id);
-          this.toast("已強制解鎖");
-        } else if(code !== null) {
-          alert("密碼錯誤");
-        }
-      },
-
-      render() {
-        const container = document.getElementById('app-container');
-        if(!container) return;
-        container.innerHTML = '';
-        this.updateUI();
-
-        if (!this.state.teamId) {
-          this.renderIntro(container);
-          return;
-        }
-
-        if(this.state.currentView === 'intro') this.navigate('mission');
-        else if(this.state.currentView === 'mission') this.renderMission(container);
-        else if(this.state.currentView === 'clues') this.renderClues(container);
-        else if(this.state.currentView === 'final') this.renderFinal(container);
-      },
-
-      renderIntro(container) {
-        let buttons = '';
-        for(let i=1; i<=8; i++) {
-          buttons += `<button onclick="app.setTeam(${i})" class="btn-secondary" style="margin-bottom:10px;">小隊 0${i}</button>`;
-        }
-        container.innerHTML = `
-          <div class="intro-container fade-in">
-            <div class="logo-box">
-              <img src="images/logo.png" onerror="this.src='https://via.placeholder.com/150?text=LOGO'">
-            </div>
-            <div class="mono" style="font-size:2rem; font-weight:bold; color:var(--accent-pink); letter-spacing:0.2em; text-shadow:0 0 10px rgba(217,70,239,0.5); margin-bottom:40px;">NTU ARCHIVE</div>
-            <div class="w-full" style="max-width:300px;">
-              <p style="color:var(--text-sub); margin-bottom:20px; font-size:0.9rem;">請選擇小隊編號</p>
-              <div class="grid-2">${buttons}</div>
-            </div>
-          </div>`;
-      },
-
-      renderMission(container) {
-        const route = TEAM_ROUTES[this.state.teamId];
-        const currentIndex = this.state.completedStages.length;
-
-        if (currentIndex >= route.length) {
-          container.innerHTML = `
-            <div class="intro-container fade-in">
-              <div style="width:80px; height:80px; border-radius:50%; border:2px solid var(--accent-yellow); display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
-                <i class="fa-solid fa-flag-checkered" style="font-size:2rem; color:var(--accent-yellow)"></i>
-              </div>
-              <h2 style="font-size:1.5rem; margin-bottom:10px; color:white;">任務全數完成</h2>
-              <p style="color:var(--text-sub); margin-bottom:30px;">請前往終端解碼</p>
-              <button onclick="app.navigate('final')" class="btn-neon">前往終端機</button>
-            </div>`;
-          return;
-        }
-
-        const s = STAGES[route[currentIndex]];
-        const isArrived = this.state.arrivedStages.includes(s.id);
-
-        let content = `
-          <div class="section-title">
-            <div>
-              <div class="mono" style="color:var(--accent-pink); font-size:0.7rem;">CURRENT_MISSION</div>
-              <h2>任務 ${currentIndex + 1} / ${route.length}</h2>
-            </div>
-            <div style="font-size:0.7rem; color:var(--text-sub); border:1px solid var(--border-color); padding:4px 8px; border-radius:4px;">
-              ${isArrived ? s.name : '地點加密'}
-            </div>
-          </div>`;
-
-        if (!isArrived) {
-          content += `
-            <div class="card fade-in">
-              <div style="margin-bottom:16px;">
-                <h3 style="margin:0 0 10px 0; font-size:1.1rem; color:white;">${s.hintTitle}</h3>
-                <div class="img-container">
-                  <img src="${s.hintImage}" onerror="this.src='https://via.placeholder.com/400x200'" class="img-cover">
-                </div>
-                <p style="color:var(--text-sub); font-size:0.9rem; line-height:1.6;">${s.hintDesc}</p>
-              </div>
-              <div style="border-top:1px solid var(--border-color); padding-top:20px; text-align:center;">
-                <button onclick="app.verifyLocation('${s.id}')" class="btn-neon">掃描目前位置</button>
-                <div id="check-status" class="mono" style="color:var(--accent-yellow); font-size:0.7rem; margin-top:10px;"></div>
-                <div class="mt-2">
-                  <button onclick="app.requestAdminSkip('${s.id}')" style="background:none; border:none; color:var(--text-sub); font-size:0.7rem; cursor:pointer;" class="mono">定位異常？(輸入救援碼)</button>
-                </div>
-              </div>
-            </div>`;
-        } else {
-          let puzzleHtml = '';
-          if (s.id === 'gym') puzzleHtml = this.getGymPuzzle();
-          // 其餘 puzzle 你原本的 function 可以照貼回來（略）
-
-          content += `
-            <div class="card fade-in">
-              <div class="img-container">
-                <img src="${s.hintImage}" class="img-cover">
-              </div>
-              <div style="color:var(--text-sub); font-size:0.9rem; margin-bottom:20px; line-height:1.6;">${s.desc}</div>
-              ${puzzleHtml || '<div class="text-sub">（此段為示範，請把你其餘 puzzle function 貼回來）</div>'}
-            </div>`;
-        }
-
-        container.innerHTML = content;
-      },
-
-      verifyLocation(id) {
-        const s = STAGES[id];
-        const stat = document.getElementById('check-status');
-        if(stat) stat.textContent = "正在定位...";
-
-        if (!navigator.geolocation) { if(stat) stat.textContent = "不支援 GPS"; return; }
-        navigator.geolocation.getCurrentPosition(
-          (p) => {
-            const dist = this.getDist(p.coords.latitude, p.coords.longitude, s.lat, s.lon) * 1000;
-            if (dist < 100) {
-              if(stat) stat.textContent = "成功！";
-              setTimeout(() => this.forceArrive(id), 1000);
-            } else {
-              if(stat) stat.textContent = "距離過遠 (" + Math.round(dist) + "m)";
-              this.toast('位置太遠');
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ntu: {
+                            bg: '#0b1121', // Deep midnight blue
+                            card: '#151e32', // Slightly lighter blue for cards
+                            accent: '#38bdf8', // Sky blue text
+                            border: '#1e293b', // Slate border
+                            yellow: '#fbbf24', // Amber for highlights
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(56, 189, 248, 0.5)',
+                        'dial-inset': 'inset 0 0 20px rgba(0,0,0,0.8)',
+                        'dial-out': '0 0 15px rgba(0,0,0,0.5)',
+                    }
+                }
             }
-          },
-          () => { if(stat) stat.textContent = "GPS 失敗"; },
-          { enableHighAccuracy: true }
-        );
-      },
-
-      forceArrive(id) {
-        if (!this.state.arrivedStages.includes(id)) {
-          this.state.arrivedStages.push(id);
-          this.saveProgress();
         }
-        this.render();
-      },
+    </script>
 
-      highlightError(id) {
-        const el = document.getElementById(id);
-        if(el) {
-          el.style.borderBottomColor = 'var(--danger)';
-          setTimeout(() => el.style.borderBottomColor = 'var(--border-color)', 1000);
+    <style>
+        body {
+            background-color: #0b1121;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            touch-action: manipulation;
         }
-      },
-
-      checkAnswer(id, inp, ans) {
-        const v = document.getElementById(inp).value.trim().toUpperCase();
-        if (v === ans.toString()) this.completeStage(id);
-        else { this.toast('答案錯誤'); this.highlightError(inp); }
-      },
-
-      completeStage(id) {
-        if (!this.state.completedStages.includes(id)) {
-          this.state.completedStages.push(id);
-          this.saveProgress();
-          alert("解鎖成功！");
+        
+        /* 掃描線動畫 */
+        .scanline {
+            width: 100%; height: 100px; z-index: 10;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(56, 189, 248, 0.03) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.4; position: absolute; bottom: 100%;
+            animation: scanline 8s linear infinite; pointer-events: none;
         }
-        this.render();
-      },
+        @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100%; } }
 
-      /* ✅ 小修：你題目寫「x>0 的局部極小值」，原本驗證 ans 是 -1 會永遠錯
-         f'(x)=3x^2-3=0 => x=±1；x=1 才是 x>0 的極小點
-         所以我把答案改成 1 */
-      getGymPuzzle() {
-        return `<div>
-          <p style="color:var(--text-sub); font-size:0.9rem; margin-bottom:10px;">$f(x) = x^3 - 3x + 1$，求 x&gt;0 的局部極小值點 x？</p>
-          <input type="text" id="ans-gym" placeholder="輸入 x" class="term-input">
-          <button onclick="app.checkAnswer('gym', 'ans-gym', '1')" class="btn-neon" style="margin-top:10px;">驗證</button>
-        </div>`;
-      },
+        /* 霓虹背景光暈 */
+        .neon-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(192, 38, 211, 0.05) 0%, transparent 40%);
+        }
 
-      renderClues(container){ container.innerHTML = `<div class="card">（略：請貼回你原本 renderClues）</div>`; },
-      renderFinal(container){ container.innerHTML = `<div class="card">（略：請貼回你原本 renderFinal）</div>`; },
+        /* 全新霓虹按鈕樣式 (符合圖片風格) */
+        .btn-neon {
+            /* 紫色到藍紫色的漸層 */
+            background: linear-gradient(90deg, #d946ef 0%, #7c3aed 100%); 
+            color: white;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            border: none;
+            /* 霓虹外發光 */
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.4); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .btn-neon:hover {
+            box-shadow: 0 0 25px rgba(217, 70, 239, 0.6);
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        .btn-neon:active {
+            transform: translateY(1px);
+            box-shadow: 0 0 10px rgba(217, 70, 239, 0.3);
+        }
+        /* 按鈕內的光澤效果 */
+        .btn-neon::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
 
-      getDist(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2-lat1)*(Math.PI/180);
-        const dLon = (lon2-lon1)*(Math.PI/180);
-        const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
-          Math.cos(lat1*(Math.PI/180))*Math.cos(lat2*(Math.PI/180)) *
-          Math.sin(dLon/2)*Math.sin(dLon/2);
-        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-      }
-    };
+        /* 轉盤樣式優化 */
+        .dial-container {
+            position: relative; width: 280px; height: 280px; margin: 0 auto;
+            border-radius: 50%; 
+            background: linear-gradient(145deg, #1a233a, #0f1623);
+            border: 12px solid #1e293b;
+            box-shadow: 
+                5px 5px 15px #070b15, 
+                -5px -5px 15px #1f2b45,
+                inset 0 0 20px #000;
+            user-select: none;
+        }
+        .dial-track {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 180px; height: 180px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.1);
+            pointer-events: none;
+        }
+        .dial-letter {
+            position: absolute; width: 40px; height: 40px;
+            text-align: center; line-height: 40px; 
+            color: #94a3b8; font-weight: bold; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem;
+            pointer-events: none; transform-origin: center center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .dial-knob {
+            position: absolute; top: 50%; left: 50%;
+            width: 170px; height: 170px; margin-left: -85px; margin-top: -85px;
+            background: #151e32;
+            border-radius: 50%;
+            box-shadow: 
+                0 4px 10px rgba(0,0,0,0.5),
+                inset 0 1px 1px rgba(255,255,255,0.1);
+            z-index: 10; cursor: grab;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid #334155;
+        }
+        .dial-knob:active { cursor: grabbing; border-color: #d946ef; } /* Active color match button */
+        
+        .dial-pointer {
+            position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 20px solid #fbbf24;
+            filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6));
+        }
 
-    window.onload = function() { app.init(); };
-  </script>
+        .term-input {
+            background: transparent; border: none; border-bottom: 2px solid #334155;
+            color: #d946ef; outline: none; transition: all 0.3s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .term-input:focus { border-bottom-color: #d946ef; background: rgba(217, 70, 239, 0.05); }
+
+        .ntu-card {
+            background: #151e32;
+            border: 1px solid #1e293b;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center relative">
+
+    <div class="scanline fixed inset-0 h-full w-full pointer-events-none"></div>
+    <div class="neon-glow"></div>
+
+    <!-- Header -->
+    <header class="fixed top-0 w-full bg-ntu-bg/90 backdrop-blur-md border-b border-ntu-border z-50 p-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <span class="text-fuchsia-500 font-bold text-lg select-none">&gt;_</span>
+            <span class="mono font-bold text-gray-100 tracking-wider">NTU_SYSTEM</span>
+        </div>
+        <div class="flex gap-4 text-xs mono items-center">
+            <div id="team-display" class="text-fuchsia-400 font-bold px-2 py-1 bg-fuchsia-500/10 rounded"></div>
+            <button onclick="app.resetGame()" class="text-red-400 hover:text-red-300 transition flex items-center gap-1">
+                <i class="fa-solid fa-triangle-exclamation"></i> 重置
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="app-container" class="w-full max-w-md h-full pt-20 pb-24 px-4 overflow-y-auto relative scroll-smooth">
+        <!-- JS Render Content -->
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 w-full max-w-md bg-ntu-bg border-t border-ntu-border p-3 grid grid-cols-3 gap-6 z-40">
+        <button onclick="app.navigate('mission')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition active-nav">
+            <i class="fa-solid fa-location-arrow text-lg"></i> <span class="text-[10px] mono">當前任務</span>
+        </button>
+        <button onclick="app.navigate('clues')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition">
+            <i class="fa-solid fa-key text-lg"></i> <span class="text-[10px] mono">金鑰碎片</span>
+        </button>
+        <button onclick="app.navigate('final')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition">
+            <i class="fa-solid fa-lock text-lg"></i> <span class="text-[10px] mono">終端解碼</span>
+        </button>
+    </nav>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-slate-800 border border-fuchsia-500/30 text-white px-6 py-3 rounded shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-3 min-w-max">
+        <i class="fa-solid fa-circle-info text-fuchsia-400"></i> <span id="toast-msg" class="font-mono text-sm">Message</span>
+    </div>
+
+    <script>
+        const ADMIN_PASS = '8888'; // 管理員救援密碼
+
+        const STAGES = {
+            'gate': {
+                id: 'gate', name: '台大校門', code: '2',
+                lat: 25.017400, lon: 121.533900, 
+                hintTitle: '知識的入口',
+                hintDesc: '所有旅程的起點，昔日的帝國大學門戶。',
+                hintImage: 'images/gate.jpg', // 修改為本地路徑
+                icon: 'fa-torii-gate', title: '時光刻度',
+                desc: '請轉動圓盤，依發生年代將校史事件排序。',
+                difficultyLabel: '歷史排序', type: 'lock'
+            },
+            'palm': {
+                id: 'palm', name: '椰林大道', code: '2', 
+                lat: 25.018500, lon: 121.539000, 
+                hintTitle: '熱帶的守望者',
+                hintDesc: '筆直的大道，兩旁高聳的植物見證了無數學子的來去。',
+                hintImage: 'images/palm.jpg', // 修改為本地路徑
+                icon: 'fa-tree', title: '光譜密碼',
+                desc: '尋找隱藏在椰林光影中的「台大紅」。請根據數學線索調配出正確的 RGB 數值。',
+                difficultyLabel: '色彩數學', type: 'color'
+            },
+            'bell': {
+                id: 'bell', name: '傅鐘', code: '2',
+                lat: 25.018000, lon: 121.538500, 
+                hintTitle: '時間的警鐘',
+                hintDesc: '為了紀念一位偉大的校長，這裡的鐘聲總是敲響21下。',
+                hintImage: 'images/bell.jpg', // 修改為本地路徑
+                icon: 'fa-bell', title: '聲速奧秘',
+                desc: '分辨真假傅鐘的聲響，計算音速與時間差。',
+                difficultyLabel: '物理數學', type: 'physics'
+            },
+            'gym': {
+                id: 'gym', name: '舊體育館', code: 'D',
+                lat: 25.022200, lon: 121.536900, 
+                hintTitle: '古典競技場',
+                hintDesc: '校園中最古老的體育建築，門口的羅馬柱是其特徵。',
+                hintImage: 'images/gym.jpg', // 修改為本地路徑
+                icon: 'fa-dumbbell', title: '函數極值',
+                desc: '彈道軌跡隱藏在古老的建築結構中。尋找三次函數的局部最低點。',
+                difficultyLabel: '數學微積分', type: 'math'
+            },
+            'lake': {
+                id: 'lake', name: '醉月湖', code: 'L',
+                lat: 25.021000, lon: 121.537000, 
+                hintTitle: '詩人的倒影',
+                hintDesc: '校園中的一抹碧波，湖心亭是其標誌。',
+                hintImage: 'images/lake.jpg', // 修改為本地路徑
+                icon: 'fa-water', title: '光學推演', 
+                desc: '分析場景中的物理條件（光源、反射介質），推導出李白觀測到的光學成像結果。',
+                difficultyLabel: '物理文學', type: 'literature'
+            },
+            'library': {
+                id: 'library', name: '總圖書館', code: 'C',
+                lat: 25.017340, lon: 121.540560, 
+                hintTitle: '知識的堡壘',
+                hintDesc: '校園的幾何中心，保存著百萬藏書的宏偉建築。',
+                hintImage: 'images/library.jpg', // 修改為本地路徑
+                icon: 'fa-book', title: '三角測量',
+                desc: '利用俯角觀測數據，計算建築物的距離與高度。',
+                difficultyLabel: '數學幾何', type: 'math'
+            },
+            'waffle': {
+                id: 'waffle', name: '小木屋', code: '0', 
+                lat: 25.019500, lon: 121.540800, 
+                hintTitle: '甜蜜的角落',
+                hintDesc: '排隊人潮總是絡繹不絕，空氣中飄散著鬆餅的香氣。',
+                hintImage: 'images/waffle.jpg', // 修改為本地路徑
+                icon: 'fa-utensils', title: '音律食材',
+                desc: '美味秘密藏在旋律裡。聆聽音符辨識音名，拼出英文食材單字。',
+                difficultyLabel: '音樂聽寫', type: 'music'
+            },
+            'subway': {
+                id: 'subway', name: '公館捷運', code: 'E',
+                lat: 25.015500, lon: 121.534000, 
+                hintTitle: '地下的脈動',
+                hintDesc: '校園旁的交通樞紐，四通八達的捷運路網。',
+                hintImage: 'images/subway.jpg', // 修改為本地路徑
+                icon: 'fa-train-subway', title: '捷運租屋',
+                desc: '奎哥想在學校附近租屋。請協助他篩選符合通勤條件的捷運站。',
+                difficultyLabel: '生活地理', type: 'checkbox'
+            }
+        };
+
+        const TEAM_ROUTES = {
+            1: ['gate', 'palm', 'bell', 'gym', 'lake', 'library', 'waffle', 'subway'],
+            2: ['bell', 'gym', 'lake', 'library', 'waffle', 'subway', 'gate', 'palm'],
+            3: ['gym', 'lake', 'library', 'waffle', 'subway', 'gate', 'palm', 'bell'],
+            4: ['subway', 'gate', 'palm', 'bell', 'gym', 'lake', 'library', 'waffle'],
+            5: ['waffle', 'subway', 'gate', 'palm', 'bell', 'gym', 'lake', 'library'],
+            6: ['library', 'waffle', 'subway', 'gate', 'palm', 'bell', 'gym', 'lake'],
+            7: ['lake', 'library', 'waffle', 'subway', 'gate', 'palm', 'bell', 'gym'],
+            8: ['palm', 'bell', 'gym', 'lake', 'library', 'waffle', 'subway', 'gate']
+        };
+
+        const FINAL_ANSWER_HASH = "REVMQ18yMDIy"; 
+
+        const app = {
+            state: {
+                teamId: null,
+                completedStages: [], arrivedStages: [],   
+                stageScores: {}, stageStartTimes: {}, 
+                currentView: 'intro', 
+                gateLockIndex: 0, gateLockSequence: [] 
+            },
+            
+            audioCtx: null,
+            noteFreqs: { 'C': 261.63, 'D': 293.66, 'E': 329.63, 'F': 349.23, 'G': 392.00, 'A': 440.00, 'B': 493.88 },
+
+            init() { this.loadProgress(); this.render(); },
+
+            initAudio() {
+                if(!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if(this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            },
+
+            playMelody(notes) {
+                this.initAudio();
+                const now = this.audioCtx.currentTime;
+                notes.forEach((n, i) => {
+                    if(!this.noteFreqs[n]) return;
+                    const osc = this.audioCtx.createOscillator();
+                    const gain = this.audioCtx.createGain();
+                    const t = now + i * 0.6;
+                    osc.type = 'triangle';
+                    osc.frequency.value = this.noteFreqs[n];
+                    osc.connect(gain);
+                    gain.connect(this.audioCtx.destination);
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.3, t + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+                    osc.start(t);
+                    osc.stop(t + 0.5);
+                });
+            },
+
+            loadProgress() {
+                const team = localStorage.getItem('ntu_puzzle_team');
+                const c = localStorage.getItem('ntu_puzzle_completed');
+                const a = localStorage.getItem('ntu_puzzle_arrived');
+                const s = localStorage.getItem('ntu_puzzle_scores');
+                const t = localStorage.getItem('ntu_puzzle_start_times');
+                
+                if (team) {
+                    this.state.teamId = parseInt(team);
+                    if (c) this.state.completedStages = JSON.parse(c);
+                    if (a) this.state.arrivedStages = JSON.parse(a);
+                    if (s) this.state.stageScores = JSON.parse(s);
+                    if (t) this.state.stageStartTimes = JSON.parse(t);
+                    this.state.currentView = 'mission';
+                }
+            },
+
+            saveProgress() {
+                if(this.state.teamId) localStorage.setItem('ntu_puzzle_team', this.state.teamId);
+                localStorage.setItem('ntu_puzzle_completed', JSON.stringify(this.state.completedStages));
+                localStorage.setItem('ntu_puzzle_arrived', JSON.stringify(this.state.arrivedStages));
+                localStorage.setItem('ntu_puzzle_scores', JSON.stringify(this.state.stageScores));
+                localStorage.setItem('ntu_puzzle_start_times', JSON.stringify(this.state.stageStartTimes));
+                this.updateUI(); 
+            },
+            
+            updateUI() {
+                if(this.state.teamId) {
+                    document.getElementById('team-display').textContent = `小隊 ${this.state.teamId}`;
+                }
+                
+                // Update Nav Highlighting
+                document.querySelectorAll('nav button').forEach(btn => {
+                   const view = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
+                   if(view === this.state.currentView) {
+                       btn.classList.add('text-fuchsia-400');
+                       btn.classList.remove('text-slate-500');
+                   } else {
+                       btn.classList.remove('text-fuchsia-400');
+                       btn.classList.add('text-slate-500');
+                   }
+                });
+            },
+
+            resetGame() {
+                if(confirm('確定要重置所有進度嗎？(包含小隊設定)')) {
+                    localStorage.clear();
+                    location.reload();
+                }
+            },
+
+            setTeam(id) {
+                this.state.teamId = id;
+                this.saveProgress();
+                this.navigate('mission');
+            },
+
+            navigate(view) {
+                this.state.currentView = view;
+                this.state.gateLockIndex = 0; 
+                this.state.gateLockSequence = [];
+                this.render();
+            },
+
+            toast(msg) {
+                const t = document.getElementById('toast');
+                document.getElementById('toast-msg').textContent = msg;
+                t.classList.remove('opacity-0');
+                setTimeout(() => t.classList.add('opacity-0'), 3000);
+            },
+
+            requestAdminSkip(id) {
+                const code = prompt("請輸入救援密碼 (由管理員提供)：");
+                if (code === ADMIN_PASS) {
+                    this.forceArrive(id);
+                    this.toast("已強制解鎖位置");
+                } else if (code !== null) {
+                    alert("密碼錯誤！");
+                }
+            },
+
+            render() {
+                const container = document.getElementById('app-container');
+                container.innerHTML = '';
+                this.updateUI();
+                
+                if (!this.state.teamId) {
+                    this.renderIntro(container);
+                    return;
+                }
+
+                if(this.state.currentView === 'intro') this.navigate('mission'); 
+                else if(this.state.currentView === 'mission') this.renderMission(container);
+                else if(this.state.currentView === 'clues') this.renderClues(container);
+                else if(this.state.currentView === 'final') this.renderFinal(container);
+            },
+
+            renderIntro(container) {
+                // Generate 8 buttons
+                let buttonsHtml = '';
+                for(let i=1; i<=8; i++) {
+                    buttonsHtml += `<button onclick="app.setTeam(${i})" class="p-4 bg-ntu-card border border-ntu-border rounded-lg hover:border-fuchsia-500 hover:shadow-[0_0_10px_rgba(217,70,239,0.5)] hover:text-fuchsia-400 transition duration-300 font-mono text-sm">小隊 0${i}</button>`;
+                }
+
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center min-h-full py-10 space-y-6 fade-in relative z-10">
+                        <div class="absolute w-64 h-64 bg-fuchsia-500/20 rounded-full blur-[80px] -z-10"></div>
+                        
+                        <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-fuchsia-500/50 shadow-[0_0_20px_rgba(217,70,239,0.3)] relative group">
+                            <div class="absolute inset-0 bg-fuchsia-500/10 group-hover:bg-transparent transition"></div>
+                            <img src="images/logo.png" alt="Team Logo" class="w-full h-full object-cover p-1 bg-white/10 backdrop-blur-sm">
+                        </div>
+                        
+                        <div class="text-3xl font-mono text-fuchsia-400 font-bold tracking-[0.3em] drop-shadow-neon mt-2">
+                            NTU ARCHIVE
+                        </div>
+
+                        <div class="w-full max-w-xs space-y-4">
+                            <p class="text-slate-400 text-sm mb-6 text-center">請選擇小隊編號以存取資料庫</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                ${buttonsHtml}
+                            </div>
+                        </div>
+                    </div>`;
+            },
+
+            renderMission(container) {
+                const route = TEAM_ROUTES[this.state.teamId];
+                const currentIndex = this.state.completedStages.length;
+                
+                if (currentIndex >= route.length) {
+                    container.innerHTML = `
+                        <div class="h-full flex flex-col items-center justify-center text-center fade-in">
+                            <div class="w-20 h-20 rounded-full bg-ntu-card flex items-center justify-center border border-fuchsia-500 mb-6 shadow-[0_0_15px_rgba(217,70,239,0.5)]">
+                                <i class="fa-solid fa-flag-checkered text-4xl text-ntu-yellow"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-white mb-2">任務全數完成</h2>
+                            <p class="text-slate-400 mb-8 text-sm">所有資料碎片已收集完畢。<br>請前往終端解碼以完成任務。</p>
+                            <button onclick="app.navigate('final')" class="px-8 py-4 btn-neon w-64 shadow-lg">
+                                <i class="fa-solid fa-terminal mr-2"></i> 前往終端機
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const currentStageId = route[currentIndex];
+                const s = STAGES[currentStageId];
+                const isArrived = this.state.arrivedStages.includes(currentStageId);
+
+                let content = '';
+                
+                content += `
+                    <div class="mb-6 flex items-center justify-between">
+                        <div>
+                            <div class="text-xs font-mono text-fuchsia-400 mb-1">CURRENT_MISSION</div>
+                            <h2 class="text-xl font-bold text-white tracking-wide">任務 ${currentIndex + 1} <span class="text-slate-500 text-sm">/ ${route.length}</span></h2>
+                        </div>
+                        <div class="text-xs px-2 py-1 rounded border border-ntu-border bg-ntu-card text-slate-400">
+                            ${isArrived ? `<i class="fa-solid fa-location-dot text-fuchsia-400 mr-1"></i> ${s.name}` : '<i class="fa-solid fa-lock text-slate-600 mr-1"></i> 地點加密'}
+                        </div>
+                    </div>
+                `;
+
+                if (!isArrived) {
+                    content += `
+                        <div class="fade-in ntu-card p-5">
+                            <div class="mb-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i class="fa-solid fa-map-pin text-red-400"></i>
+                                    <h3 class="text-lg font-bold text-white">${s.hintTitle}</h3>
+                                </div>
+                                <div class="rounded-lg overflow-hidden border border-ntu-border mb-4 shadow-lg relative group">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+                                    <img src="${s.hintImage}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-700">
+                                    <div class="absolute bottom-3 left-3 z-20 text-xs text-white/80 mono">REF_IMG_${currentStageId.toUpperCase()}</div>
+                                </div>
+                                <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-ntu-border pl-3">${s.hintDesc}</p>
+                            </div>
+                            
+                            <div class="border-t border-ntu-border pt-6 text-center">
+                                <button onclick="app.verifyLocation('${s.id}')" class="w-full btn-neon py-4 text-lg flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-satellite-dish"></i> 掃描目前位置
+                                </button>
+                                <div id="check-status" class="text-xs text-ntu-yellow mt-3 min-h-[1.5rem] font-mono"></div>
+                                <div class="mt-2">
+                                    <button onclick="app.requestAdminSkip('${s.id}')" class="text-[10px] text-slate-600 hover:text-slate-400 font-mono tracking-wider">
+                                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> 定位異常？(輸入救援碼)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    let mediaHtml = '';
+                    if (s.youtube) mediaHtml += `<div class="mb-4 rounded overflow-hidden border border-ntu-border shadow-lg"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${s.youtube}" frameborder="0" allowfullscreen></iframe></div>`;
+                    if (s.image) mediaHtml += `<div class="mb-4 rounded overflow-hidden border border-ntu-border shadow-lg"><img src="${s.image}" class="w-full object-cover"></div>`;
+
+                    let puzzleHtml = '';
+                    switch (s.id) {
+                        case 'gym': puzzleHtml = this.getGymPuzzle(); break;
+                        case 'subway': puzzleHtml = this.getSubwayPuzzle(); break;
+                        case 'lake': puzzleHtml = this.getLakePuzzle(); break;
+                        case 'library': puzzleHtml = this.getLibraryPuzzle(); break;
+                        case 'waffle': puzzleHtml = this.getWafflePuzzle(); break;
+                        case 'gate': puzzleHtml = this.getGatePuzzle(); break;
+                        case 'bell': puzzleHtml = this.getBellPuzzle(); break;
+                        case 'palm': puzzleHtml = this.getPalmPuzzle(); break;
+                    }
+
+                    content += `
+                        <div class="fade-in ntu-card p-5">
+                            <div class="flex items-center justify-between mb-4 border-b border-ntu-border pb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-ntu-bg flex items-center justify-center border border-ntu-border">
+                                        <i class="fa-solid ${s.icon} text-fuchsia-400"></i>
+                                    </div>
+                                    <span class="text-lg font-bold text-white">${s.name}</span>
+                                </div>
+                                <span class="text-[10px] bg-ntu-bg border border-ntu-border px-2 py-1 rounded text-slate-400 font-mono">${s.difficultyLabel}</span>
+                            </div>
+                            <div class="text-sm text-slate-300 mb-6 leading-relaxed">${s.desc}</div>
+                            ${mediaHtml}
+                            ${puzzleHtml}
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = content;
+
+                if(isArrived) {
+                    if(s.id === 'library') this.initLibraryEvents(); 
+                    if(s.id === 'waffle') this.initWaffleEvents();
+                    if(s.id === 'gate') this.initGateLock();
+                    if(s.id === 'palm') this.initPalmEvents();
+                }
+            },
+
+            verifyLocation(id) {
+                const s = STAGES[id];
+                const stat = document.getElementById('check-status');
+                stat.textContent = "正在連線衛星進行三角定位...";
+                stat.className = "text-xs text-fuchsia-400 animate-pulse mt-3 min-h-[1.5rem] font-mono";
+
+                if (!navigator.geolocation) { stat.textContent = "錯誤：瀏覽器不支援 GPS"; return; }
+                navigator.geolocation.getCurrentPosition(
+                    (p) => {
+                        const dist = this.getDist(p.coords.latitude, p.coords.longitude, s.lat, s.lon) * 1000;
+                        if (dist < 100) {
+                            stat.textContent = "訊號捕獲成功！正在解密...";
+                            stat.className = "text-xs text-emerald-400 font-bold mt-3 min-h-[1.5rem] font-mono";
+                            setTimeout(() => this.forceArrive(id), 1500);
+                        } else {
+                            stat.textContent = `距離目標尚有 ${Math.round(dist)} 公尺`;
+                            stat.className = "text-xs text-red-400 mt-3 min-h-[1.5rem] font-mono";
+                            this.toast('位置太遠，請移動至目標地點');
+                        }
+                    },
+                    (e) => { stat.textContent = "GPS 讀取失敗"; stat.className = "text-xs text-red-500 mt-3 min-h-[1.5rem] font-mono"; },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            },
+
+            forceArrive(id) {
+                if (!this.state.arrivedStages.includes(id)) {
+                    this.state.arrivedStages.push(id);
+                    if (!this.state.stageStartTimes[id]) this.state.stageStartTimes[id] = Date.now();
+                    this.saveProgress();
+                    this.toast('區域解鎖成功');
+                }
+                this.render();
+            },
+
+            /* --- PUZZLES --- */
+
+            // 7. 椰林大道 (Color Math) - UPDATED TO RGB PUZZLE
+            getPalmPuzzle() {
+                return `
+                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded mb-4">
+                        <div class="text-left text-sm text-slate-300 mb-6 space-y-2 border-l-2 border-slate-700 pl-3">
+                            <p class="font-bold text-white mb-2">光譜參數：</p>
+                            <ul class="list-disc list-inside text-slate-400 text-xs space-y-2">
+                                <li>R (紅): <span class="text-fuchsia-400">椰林大道兩側各96顆椰子樹，共幾棵？</span></li>
+                                <li>G (綠): <span class="text-fuchsia-400">第二個完全數 (Perfect Number)</span></li>
+                                <li>B (藍): <span class="text-fuchsia-400">氧原子 (O) 的原子序平方</span></li>
+                            </ul>
+                        </div>
+
+                        <div id="color-preview" class="w-full h-16 rounded mb-4 border border-slate-600 transition-colors duration-300" style="background-color:rgb(0,0,0)"></div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <label class="text-xs font-bold text-red-400">RED</label>
+                                    <span id="val-r" class="text-xs mono font-bold text-red-400">0</span>
+                                </div>
+                                <input type="range" id="range-r" min="0" max="255" value="0" class="w-full accent-red-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <label class="text-xs font-bold text-green-400">GREEN</label>
+                                    <span id="val-g" class="text-xs mono font-bold text-green-400">0</span>
+                                </div>
+                                <input type="range" id="range-g" min="0" max="255" value="0" class="w-full accent-green-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <label class="text-xs font-bold text-blue-400">BLUE</label>
+                                    <span id="val-b" class="text-xs mono font-bold text-blue-400">0</span>
+                                </div>
+                                <input type="range" id="range-b" min="0" max="255" value="0" class="w-full accent-blue-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="app.checkPalm()" class="w-full btn-neon py-3">確認光譜</button>`;
+            },
+
+            initPalmEvents() {
+                setTimeout(() => {
+                    const r = document.getElementById('range-r');
+                    const g = document.getElementById('range-g');
+                    const b = document.getElementById('range-b');
+                    if(!r) return;
+                    
+                    const updateColor = () => { 
+                        document.getElementById('color-preview').style.backgroundColor = `rgb(${r.value}, ${g.value}, ${b.value})`; 
+                        document.getElementById('val-r').innerText = r.value; 
+                        document.getElementById('val-g').innerText = g.value; 
+                        document.getElementById('val-b').innerText = b.value;
+                    };
+                    
+                    [r, g, b].forEach(el => el.addEventListener('input', updateColor));
+                }, 100);
+            },
+
+            checkPalm() {
+                // Ans: R=192, G=28, B=64
+                const r = document.getElementById('range-r').value;
+                const g = document.getElementById('range-g').value;
+                const b = document.getElementById('range-b').value;
+                
+                if (r == 192 && g == 28 && b == 64) {
+                    this.completeStage('palm');
+                } else {
+                    this.toast('光譜頻率錯誤');
+                }
+            },
+
+            // 5. 台大校門 (Lock Puzzle) - Updated Visuals
+            getGatePuzzle() {
+                const letters = ['A','B','C','D','E','F','G'];
+                let dialHtml = '';
+                const radius = 110; 
+                const centerOffset = 128; // Adjusted for new border width (280/2 - 12)
+                letters.forEach((l, i) => {
+                    const angleDeg = i * (360/7);
+                    const angleRad = angleDeg * (Math.PI/180);
+                    const x = centerOffset + radius * Math.sin(angleRad);
+                    const y = centerOffset - radius * Math.cos(angleRad);
+                    dialHtml += `<div class="dial-letter" style="left:${x}px; top:${y}px; transform: translate(-50%, -50%) rotate(${angleDeg}deg);">${l}</div>`;
+                });
+
+                return `
+                    <div class="select-none">
+                        <div class="text-xs text-slate-400 space-y-1 mb-6 p-3 bg-ntu-bg rounded border border-ntu-border font-mono leading-relaxed">
+                            <div><span class="text-fuchsia-400">A.</span> 改為國立臺灣大學</div>
+                            <div><span class="text-fuchsia-400">B.</span> 校友獲得諾貝爾獎</div>
+                            <div><span class="text-fuchsia-400">C.</span> 這一年學生數為59人</div>
+                            <div><span class="text-fuchsia-400">D.</span> 舉辦首屆杜鵑花節</div>
+                            <div><span class="text-fuchsia-400">E.</span> 公布設立醫學部</div>
+                            <div><span class="text-fuchsia-400">F.</span> 成立國立臺灣大學聯盟</div>
+                            <div><span class="text-fuchsia-400">G.</span> 公布校歌</div>
+                        </div>
+                        
+                        <div class="dial-container mb-6" id="dial-container">
+                            <div class="dial-track"></div>
+                            ${dialHtml}
+                            <div class="dial-knob" id="gate-knob">
+                                <div class="dial-pointer"></div>
+                                <div class="text-center">
+                                    <div class="text-[10px] text-slate-500 font-mono tracking-widest">順序</div>
+                                    <div class="text-5xl font-bold text-white font-mono mt-1" id="gate-seq-num">1</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-3 mb-4">
+                            <button onclick="app.resetGateLock()" class="flex-1 bg-ntu-bg border border-ntu-border hover:border-slate-500 text-slate-400 py-3 rounded font-bold transition">
+                                <i class="fa-solid fa-rotate-left mr-1"></i> 重設
+                            </button>
+                            <button onclick="app.confirmGateSelection()" class="flex-[2] btn-neon py-3">
+                                <i class="fa-solid fa-lock mr-1"></i> 確認鎖定
+                            </button>
+                        </div>
+                        
+                        <div class="flex justify-center gap-2 p-3 bg-ntu-bg rounded border border-ntu-border" id="gate-progress"></div>
+                    </div>`;
+            },
+            
+            initGateLock() {
+                this.gateRotation = 0; this.isDragging = false; this.updateGateUI();
+                const knob = document.getElementById('gate-knob'); const container = document.getElementById('dial-container');
+                const start = (e) => { this.isDragging = true; e.preventDefault(); };
+                const move = (e) => {
+                    if (!this.isDragging) return; e.preventDefault();
+                    const rect = container.getBoundingClientRect();
+                    const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
+                    const cx_t = e.touches ? e.touches[0].clientX : e.clientX; const cy_t = e.touches ? e.touches[0].clientY : e.clientY;
+                    let angleDeg = Math.atan2(cy_t - cy, cx_t - cx) * (180 / Math.PI);
+                    this.gateRotation = angleDeg + 90;
+                    document.getElementById('gate-knob').style.transform = `rotate(${this.gateRotation}deg)`;
+                };
+                const end = (e) => {
+                    if (!this.isDragging) return; this.isDragging = false;
+                    const step = 360/7;
+                    let norm = this.gateRotation % 360; if(norm < 0) norm += 360;
+                    this.gateRotation = Math.round(norm / step) * step;
+                    const el = document.getElementById('gate-knob');
+                    el.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    el.style.transform = `rotate(${this.gateRotation}deg)`;
+                    setTimeout(() => { el.style.transition = 'none'; }, 300);
+                };
+                knob.addEventListener('mousedown', start); knob.addEventListener('touchstart', start);
+                window.addEventListener('mousemove', move); window.addEventListener('touchmove', move, { passive: false });
+                window.addEventListener('mouseup', end); window.addEventListener('touchend', end);
+            },
+
+            resetGateLock() {
+                this.state.gateLockIndex = 0; this.state.gateLockSequence = []; this.gateRotation = 0;
+                document.getElementById('gate-knob').style.transform = `rotate(0deg)`;
+                this.updateGateUI(); this.toast('密碼鎖已重置');
+            },
+
+            confirmGateSelection() {
+                const letters = ['A','B','C','D','E','F','G']; 
+                let deg = this.gateRotation % 360; if (deg < 0) deg += 360;
+                let index = Math.round(deg / (360/7)) % 7;
+                this.state.gateLockSequence.push(letters[index]);
+                this.state.gateLockIndex++;
+                if (this.state.gateLockIndex < 7) {
+                    this.updateGateUI();
+                    // Feedback visual
+                    const knob = document.getElementById('gate-knob');
+                    knob.style.borderColor = '#d946ef'; setTimeout(() => knob.style.borderColor = '#334155', 200);
+                } else {
+                    if (this.state.gateLockSequence.join('') === 'CEAGBDF') this.completeStage('gate');
+                    else {
+                        this.toast('排序錯誤，系統重置');
+                        this.resetGateLock();
+                    }
+                }
+            },
+
+            updateGateUI() {
+                const nextSeqNum = this.state.gateLockIndex + 1;
+                if(document.getElementById('gate-seq-num')) document.getElementById('gate-seq-num').innerText = nextSeqNum > 7 ? 7 : nextSeqNum;
+                const prog = document.getElementById('gate-progress');
+                if(prog) {
+                    prog.innerHTML = '';
+                    for(let i=0; i<7; i++) {
+                        const letter = this.state.gateLockSequence[i];
+                        const isLocked = i < this.state.gateLockIndex;
+                        const boxClass = isLocked ? 'bg-fuchsia-600 text-white border-fuchsia-400' : 'bg-ntu-card text-slate-600 border-ntu-border';
+                        prog.innerHTML += `<div class="w-8 h-10 border ${boxClass} rounded flex items-center justify-center font-mono font-bold text-lg transition-all">${isLocked ? letter : '?'}</div>`;
+                    }
+                }
+            },
+
+            // 1. 小木屋 (Music)
+            getWafflePuzzle() {
+                return `
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-ntu-bg border border-ntu-border mb-3 shadow-lg">
+                            <i class="fa-solid fa-music text-2xl text-purple-400"></i>
+                        </div>
+                        <p class="text-sm text-slate-300">點擊播放按鈕，聆聽旋律中的音符（例如 Do=C），拼出對應的英文單字。</p>
+                    </div>
+                    
+                    <div class="space-y-4 mb-6">
+                        ${['E,G,G','B,E,E,F','C,A,B,B,A,G,E'].map((notes, i) => `
+                            <div class="bg-ntu-bg border border-ntu-border p-4 rounded flex items-center gap-3">
+                                <span class="text-purple-400 font-mono font-bold w-8">Q${i+1}</span>
+                                <button onclick="app.playMelody(['${notes.split(',').join("','")}'])" class="bg-purple-600 hover:bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-play text-xs"></i></button>
+                                <input type="text" id="waffle-q${i+1}" class="term-input flex-1 p-1 text-center uppercase tracking-widest" placeholder="TYPE HERE">
+                            </div>`).join('')}
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <button onclick="app.playMelody(['C'])" class="text-xs text-slate-500 hover:text-white transition flex items-center gap-1">
+                            <i class="fa-regular fa-circle-play"></i> 試聽基準音 C (Do)
+                        </button>
+                    </div>
+
+                    <button onclick="app.checkWaffle()" class="w-full btn-neon py-3">提交驗證</button>`;
+            },
+            initWaffleEvents() { },
+            checkWaffle() {
+                const ans = ['EGG','BEEF','CABBAGE'];
+                let c = 0;
+                ans.forEach((a, i) => {
+                    const el = document.getElementById(`waffle-q${i+1}`);
+                    if(el.value.trim().toUpperCase() === a) c++; else {
+                        el.style.borderBottomColor = '#ef4444';
+                        setTimeout(() => el.style.borderBottomColor = '#334155', 1000);
+                    }
+                });
+                if(c===3) this.completeStage('waffle');
+                else this.toast(`答對 ${c}/3 題`);
+            },
+
+            // 6. 傅鐘 (Physics)
+            getBellPuzzle() {
+                return `
+                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4">
+                        <div class="text-left text-sm text-slate-300 mb-6 space-y-2 h-40 overflow-y-auto pr-2 custom-scrollbar border-l-2 border-slate-700 pl-3">
+                            <p class="font-bold text-white mb-2">事件紀錄：</p>
+                            <ul class="list-disc list-inside text-slate-400 text-xs space-y-2 leading-relaxed">
+                                <li>環境氣溫：<span class="text-fuchsia-400">15°C</span></li>
+                                <li>傅鐘：間隔 <span class="text-fuchsia-400">3秒</span>，共 <span class="text-fuchsia-400">21下</span></li>
+                                <li>位置：距真傅鐘 <span class="text-fuchsia-400">1700m</span></li>
+                                <li>干擾：假喇叭在中間，距奎哥近 <span class="text-fuchsia-400">200m</span> (1500m)</li>
+                                <li>觀測：假鐘第一聲比真鐘早 <span class="text-fuchsia-400">12秒</span></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="relative">
+                                <label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q1 音速 v (m/s)</label>
+                                <input type="number" id="bell-q1" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition">
+                            </div>
+                            <div class="relative">
+                                <label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q2 假喇叭提早 (s)</label>
+                                <input type="number" id="bell-q2" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition">
+                            </div>
+                            <div class="relative">
+                                <label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q3 真正遲到倒數 (s)</label>
+                                <input type="number" id="bell-q3" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition">
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="app.checkBellAns()" class="w-full btn-neon py-3">提交驗證</button>`;
+            },
+            
+            checkBellAns() {
+                const q1 = document.getElementById('bell-q1').value.trim();
+                const q2 = document.getElementById('bell-q2').value.trim();
+                const q3 = document.getElementById('bell-q3').value.trim();
+                
+                let correct = 0;
+                if(q1 == '340') correct++; else this.highlightError('bell-q1');
+                if(q2 == '11.4') correct++; else this.highlightError('bell-q2');
+                if(q3 == '72') correct++; else this.highlightError('bell-q3');
+                
+                if(correct === 3) this.completeStage('bell');
+                else this.toast(`答對 ${correct}/3 題`);
+            },
+
+            // 8. 總圖書館 (Logic/Math)
+            getLibraryPuzzle() {
+                return `
+                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4">
+                        <div class="text-left text-sm text-slate-300 mb-6 space-y-2 border-l-2 border-slate-700 pl-3">
+                            <p class="font-bold text-white mb-2">觀測數據：</p>
+                            <ul class="list-disc list-inside text-slate-400 text-xs space-y-2">
+                                <li>觀測點：總圖書館樓頂</li>
+                                <li>目標A (正西)：圖資系館 <span class="text-fuchsia-400">俯角 10°</span></li>
+                                <li>目標B (正南)：森林系館 <span class="text-fuchsia-400">俯角 8°</span></li>
+                            </ul>
+                            <div class="mt-4 p-2 bg-slate-800/50 rounded text-xs text-slate-500 flex items-center gap-2">
+                                <i class="fa-brands fa-google"></i> 提示：利用 Google Maps 測量地標距離
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="relative">
+                                <label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q1 AB系館距離 (m)</label>
+                                <input type="number" id="lib-q1" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition">
+                            </div>
+                            <div class="relative">
+                                <label class="absolute -top-2 left-2 px-1 bg-ntu-bg text-[10px] text-slate-500">Q2 奎哥所在高度 (m)</label>
+                                <input type="number" id="lib-q2" class="w-full bg-transparent border border-ntu-border rounded p-3 text-white text-center outline-none focus:border-fuchsia-400 transition">
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="app.checkLibraryAns()" class="w-full btn-neon py-3">提交驗證</button>`;
+            },
+            initLibraryEvents() {}, 
+            
+            checkLibraryAns() {
+                const q1 = document.getElementById('lib-q1').value.trim();
+                const q2 = document.getElementById('lib-q2').value.trim();
+                
+                let correct = 0;
+                if(q1 == '90') correct++; else this.highlightError('lib-q1');
+                if(q2 == '21') correct++; else this.highlightError('lib-q2');
+                
+                if(correct === 2) this.completeStage('library');
+                else this.toast(`答對 ${correct}/2 題`);
+            },
+
+            // 4. 公館捷運 - Checkbox
+            getSubwayPuzzle() {
+                const options = ['台北車站', '新店', '秀朗橋', '南勢角', '雙連', '忠孝復興', '龍山寺', '中和', '行天宮', '小碧潭'];
+                let html = `<div class="bg-ntu-bg border border-ntu-border p-4 rounded text-left mb-4">
+                    <p class="text-sm text-slate-300 mb-4 leading-relaxed">
+                        <span class="text-fuchsia-400 font-bold">租屋篩選條件：</span><br>
+                        1. 離學校(公館) 6 站捷運以內<br>
+                        2. 最多只需要換線 1 次
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">`;
+
+                options.forEach((opt) => {
+                    html += `
+                        <label class="flex items-center space-x-3 cursor-pointer bg-ntu-card p-3 rounded border border-ntu-border hover:border-fuchsia-400 transition select-none group">
+                            <input type="checkbox" name="subway-opt" value="${opt}" class="form-checkbox h-4 w-4 text-fuchsia-400 rounded bg-slate-900 border-slate-600 focus:ring-offset-0 focus:ring-0">
+                            <span class="text-xs text-slate-300 group-hover:text-white">${opt}</span>
+                        </label>`;
+                });
+
+                html += `</div></div>
+                <button onclick="app.checkSubwayAns()" class="w-full btn-neon py-3">提交驗證</button>`;
+                return html;
+            },
+            
+            checkSubwayAns() {
+                const correct = ['台北車站', '新店', '秀朗橋', '南勢角', '龍山寺', '行天宮', '小碧潭'];
+                const checked = Array.from(document.querySelectorAll('input[name="subway-opt"]:checked')).map(el => el.value);
+                correct.sort(); checked.sort();
+                const isMatch = correct.length === checked.length && correct.every((val, index) => val === checked[index]);
+                if (isMatch) this.completeStage('subway');
+                else this.toast('選擇錯誤，請再檢查捷運圖');
+            },
+
+            // Other Puzzles
+            getLakePuzzle() {
+                return `
+                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4">
+                        <i class="fa-solid fa-moon text-4xl text-ntu-yellow mb-4 drop-shadow-neon"></i>
+                        <div class="text-left text-sm text-slate-300 mb-6 space-y-2">
+                            <p class="font-bold text-fuchsia-400 mb-2">光學觀測實驗報告：</p>
+                            <div class="p-3 bg-ntu-card rounded border border-ntu-border space-y-2 text-xs mono mb-4">
+                                <p><span class="text-slate-500">觀測者(Object):</span> 李白 (N=1)</p>
+                                <p><span class="text-slate-500">光源(Source):</span> 明月</p>
+                                <p><span class="text-slate-500">反射介質(Medium):</span> 酒/地面</p>
+                                <p><span class="text-slate-500">成像結果(Image):</span> 影子(Shadow) + 像(Reflection)</p>
+                            </div>
+                            <p class="leading-relaxed border-l-2 border-slate-700 pl-3">
+                                當光源照射物體，並經過介質反射後。觀測者聲稱系統中出現了<span class="text-fuchsia-400">「三個實體」</span>（觀測者本人、光源、以及投影成像）。
+                            </p>
+                            <p class="mt-4 text-xs text-slate-400">
+                                請根據唐代學者李白的《光學觀測筆記》（原名：月下獨酌），輸入描述此物理現象結果的詩句（五個字）。
+                            </p>
+                        </div>
+                        <input type="text" id="ans-lake" placeholder="輸入五字詩句" class="term-input w-full p-2 text-center text-lg mb-2">
+                    </div>
+                    <button onclick="app.checkAnswerText('lake', 'ans-lake', ['對影成三人'])" class="w-full btn-neon py-3">提交驗證</button>
+                `;
+            },
+            getGymPuzzle() {
+                return `<div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4">
+                    <p class="text-sm text-slate-300 mb-4 text-left">修正方程式：$f(x) = x^3 - 3x + 1$。請計算此函數在 $x > 0$ 區域內的局部極小值是多少？</p>
+                    <input type="text" id="ans-gym" placeholder="輸入數值" class="term-input w-full p-2 text-center text-lg">
+                </div><button onclick="app.checkAnswer('gym', 'ans-gym', '-1')" class="w-full btn-neon py-3">提交驗證</button>`;
+            },
+
+            // Helpers
+            highlightError(id) {
+                const el = document.getElementById(id);
+                el.classList.add('border-red-500');
+                setTimeout(()=>el.classList.remove('border-red-500'), 1000);
+            },
+
+            checkAnswer(id, inp, ans) {
+                const v = document.getElementById(inp).value.trim().toUpperCase();
+                if (v === ans.toString()) this.completeStage(id);
+                else { this.toast('答案錯誤'); this.highlightError(inp); }
+            },
+            checkAnswerText(id, inp, anss) {
+                const v = document.getElementById(inp).value.trim();
+                if (anss.includes(v)) this.completeStage(id);
+                else { this.toast('答案錯誤'); this.highlightError(inp); }
+            },
+
+            completeStage(id) {
+                if (!this.state.completedStages.includes(id)) {
+                    const st = this.state.stageStartTimes[id] || Date.now();
+                    const em = (Date.now() - st) / 1000 / 60;
+                    const stars = em <= 5 ? 3 : (em <= 10 ? 2 : 1);
+                    this.state.stageScores[id] = stars;
+                    this.state.completedStages.push(id);
+                    this.saveProgress();
+                    
+                    const c = STAGES[id].code;
+                    document.getElementById('app-container').innerHTML = `
+                        <div class="h-full flex flex-col items-center justify-center fade-in text-center">
+                            <div class="w-24 h-24 rounded-full bg-ntu-card border border-fuchsia-500 flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(217,70,239,0.5)]">
+                                <i class="fa-solid fa-unlock text-4xl text-white"></i>
+                            </div>
+                            <div class="text-fuchsia-400 text-sm font-mono tracking-widest mb-2">SYSTEM_UNLOCKED</div>
+                            <h2 class="text-3xl font-bold text-white mb-4">解鎖成功</h2>
+                            <div class="flex items-center justify-center gap-1 text-2xl text-ntu-yellow mb-6">
+                                ${'★'.repeat(stars)}${'<span class="text-slate-700">★</span>'.repeat(3-stars)}
+                            </div>
+                            <div class="bg-ntu-bg border border-ntu-border rounded p-4 mb-8">
+                                <div class="text-xs text-slate-500 mb-1">獲得金鑰碎片</div>
+                                <div class="text-4xl font-mono font-bold text-white">${c}</div>
+                            </div>
+                            <button onclick="app.navigate('mission')" class="px-8 py-3 bg-slate-700 hover:bg-slate-600 rounded text-white font-bold transition">前往下一站</button>
+                        </div>`;
+                } else this.render();
+            },
+
+            renderClues(container) {
+                const route = TEAM_ROUTES[this.state.teamId];
+                let html = `
+                    <div class="mb-6 flex items-center justify-between border-l-4 border-fuchsia-500 pl-3">
+                        <h2 class="text-xl font-bold text-white">資料庫碎片</h2>
+                        <span class="text-xs text-slate-500 font-mono">DB_STATUS: ${this.state.completedStages.length}/${route.length}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">`; 
+                
+                route.forEach(k => {
+                    const s = STAGES[k];
+                    const u = this.state.completedStages.includes(k);
+                    html += `
+                        <div class="ntu-card aspect-square flex flex-col items-center justify-center relative group transition hover:border-fuchsia-500/50">
+                            ${u ? `
+                                <span class="text-5xl font-bold text-fuchsia-400 font-mono mb-2 drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]">${s.code}</span>
+                                <span class="text-xs text-slate-400">${s.name}</span>
+                            ` : `
+                                <i class="fa-solid fa-lock text-3xl text-slate-700 mb-2"></i>
+                                <span class="text-xs text-slate-700 font-mono">LOCKED</span>
+                            `}
+                        </div>`;
+                });
+                container.innerHTML = html + `</div>`;
+            },
+
+            renderFinal(container) {
+                const ok = this.state.completedStages.length === TEAM_ROUTES[this.state.teamId].length;
+                container.innerHTML = `
+                    <div class="mb-6 border-l-4 border-red-500 pl-3">
+                        <h2 class="text-xl font-bold text-white">終端核心</h2>
+                        <div class="text-xs text-red-400 mt-1">ACCESS_LEVEL: ADMIN</div>
+                    </div>
+                    
+                    <div class="ntu-card p-8 text-center" id="final-card">
+                        <div class="mb-6 relative inline-block">
+                            <i class="fa-solid fa-shield-halved text-6xl ${ok?'text-red-500 animate-pulse':'text-slate-700'}"></i>
+                            ${ok ? '<div class="absolute inset-0 bg-red-500 blur-xl opacity-20 animate-pulse"></div>' : ''}
+                        </div>
+                        
+                        <p class="text-sm text-slate-400 mb-6 font-mono">請輸入完整的「智慧之鑰」代碼以解鎖系統核心。</p>
+                        
+                        <div class="flex items-center justify-center gap-2 mb-6">
+                            <input type="text" id="final-part1" class="w-24 bg-ntu-bg border-2 border-slate-600 rounded p-3 text-center font-mono text-xl tracking-widest text-white focus:border-red-500 outline-none uppercase transition" maxlength="4" ${!ok?'disabled':''}>
+                            <span class="text-slate-500 text-2xl font-mono">_</span>
+                            <input type="text" id="final-part2" class="w-24 bg-ntu-bg border-2 border-slate-600 rounded p-3 text-center font-mono text-xl tracking-widest text-white focus:border-red-500 outline-none uppercase transition" maxlength="4" ${!ok?'disabled':''}>
+                        </div>
+                        
+                        ${!ok ? 
+                            `<div class="flex items-center justify-center gap-2 text-xs text-red-400 bg-red-500/10 p-2 rounded border border-red-500/20"><i class="fa-solid fa-lock"></i> 存取被拒：需先完成所有任務</div>` : 
+                            `<button onclick="app.checkFinal()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded shadow-[0_0_15px_rgba(220,38,38,0.5)] transition active:scale-95">執行解密程序</button>`
+                        }
+                    </div>`;
+            },
+
+            checkFinal() {
+                try {
+                    const p1 = document.getElementById('final-part1').value.trim().toUpperCase();
+                    const p2 = document.getElementById('final-part2').value.trim().toUpperCase();
+                    const input = `${p1}_${p2}`;
+                    
+                    if (btoa(input) === FINAL_ANSWER_HASH) {
+                        const container = document.getElementById('app-container');
+                        container.innerHTML = `
+                            <div class="h-full flex flex-col items-center justify-center fade-in px-4">
+                                <div class="w-full max-w-sm bg-ntu-bg border-2 border-emerald-500 rounded-lg p-8 text-center shadow-[0_0_20px_rgba(16,185,129,0.3)] relative overflow-hidden">
+                                    <div class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                        <i class="fa-solid fa-check text-3xl text-ntu-bg"></i>
+                                    </div>
+                                    <h2 class="text-3xl font-bold text-white mb-2 tracking-wide">ACCESS GRANTED</h2>
+                                    <div class="space-y-2 mb-8">
+                                        <p class="text-slate-300">恭喜獲得智慧之鑰！</p>
+                                        <p class="text-slate-300">請截圖此畫面領取獎勵。</p>
+                                    </div>
+                                    <div class="h-px w-full bg-emerald-500/30 mb-6"></div>
+                                    <div class="font-mono text-emerald-500 text-sm tracking-widest">
+                                        HASH: ${Date.now().toString(16).toUpperCase()}
+                                    </div>
+                                </div>
+                            </div>`;
+                        this.toast('解密成功！');
+                    } else { this.toast('代碼錯誤 (ACCESS DENIED)'); }
+                } catch(e) { this.toast('格式錯誤'); }
+            },
+
+            getDist(lat1, lon1, lat2, lon2) {
+                const R = 6371; const dLat = (lat2-lat1)*(Math.PI/180); const dLon = (lon2-lon1)*(Math.PI/180);
+                const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180))*Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2)*Math.sin(dLon/2);
+                return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
 </body>
 </html>
