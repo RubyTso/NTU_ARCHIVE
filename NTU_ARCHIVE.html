@@ -4,19 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-  <!-- ✅ 修正 CSP：把 unsafe-inline/unsafe-eval 放到 script-src / style-src -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self' https: data: blob:;
-    script-src 'self' https: 'unsafe-inline' 'unsafe-eval' data: blob:;
-    style-src  'self' https: 'unsafe-inline';
-    img-src    'self' https: data: blob:;
-    font-src   'self' https: data:;
-    connect-src 'self' https:;
-    object-src 'none';
-    base-uri 'self';
-    frame-ancestors 'self';
-  ">
-
   <title>Project: NTU_LEGACY | 台大實境解謎</title>
   <link rel="icon" type="image/png" href="images/logo.png" />
 
