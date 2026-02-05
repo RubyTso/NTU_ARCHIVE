@@ -3,47 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Project: NTU_LEGACY | 台大實境解謎</title>
-    <!-- 設定網頁 Favicon (瀏覽器分頁圖示) -->
-    <link rel="icon" type="image/png" href="images/logo.png">
+    <!-- 解決 GitHub Pages 阻擋腳本執行的關鍵設定 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://upload.wikimedia.org https://www.youtube.com;">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Project: NTU_LEGACY | 台大實境解謎</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        ntu: {
-                            bg: '#0b1121', // Deep midnight blue
-                            card: '#151e32', // Slightly lighter blue for cards
-                            accent: '#38bdf8', // Sky blue text
-                            border: '#1e293b', // Slate border
-                            yellow: '#fbbf24', // Amber for highlights
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Noto Sans TC', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    boxShadow: {
-                        'neon': '0 0 10px rgba(56, 189, 248, 0.5)',
-                        'dial-inset': 'inset 0 0 20px rgba(0,0,0,0.8)',
-                        'dial-out': '0 0 15px rgba(0,0,0,0.5)',
-                    }
-                }
-            }
-        }
-    </script>
-
+    <!-- 優先載入基礎樣式，避免白畫面 -->
     <style>
         body {
             background-color: #0b1121;
             color: #e2e8f0;
             overflow-x: hidden;
             touch-action: manipulation;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
         }
         
         /* 掃描線動畫 */
@@ -63,19 +38,13 @@
                 radial-gradient(circle at 90% 80%, rgba(192, 38, 211, 0.05) 0%, transparent 40%);
         }
 
-        /* 全新霓虹按鈕樣式 (符合圖片風格) */
+        /* 霓虹按鈕 */
         .btn-neon {
-            /* 紫色到藍紫色的漸層 */
             background: linear-gradient(90deg, #d946ef 0%, #7c3aed 100%); 
-            color: white;
-            font-weight: bold;
-            border-radius: 0.5rem;
-            border: none;
-            /* 霓虹外發光 */
+            color: white; font-weight: bold; border-radius: 0.5rem; border: none;
             box-shadow: 0 0 15px rgba(217, 70, 239, 0.4); 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden;
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
         .btn-neon:hover {
@@ -87,89 +56,103 @@
             transform: translateY(1px);
             box-shadow: 0 0 10px rgba(217, 70, 239, 0.3);
         }
-        /* 按鈕內的光澤效果 */
-        .btn-neon::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 50%);
-            pointer-events: none;
-        }
 
-        /* 轉盤樣式優化 */
+        /* 轉盤樣式 */
         .dial-container {
             position: relative; width: 280px; height: 280px; margin: 0 auto;
             border-radius: 50%; 
             background: linear-gradient(145deg, #1a233a, #0f1623);
             border: 12px solid #1e293b;
-            box-shadow: 
-                5px 5px 15px #070b15, 
-                -5px -5px 15px #1f2b45,
-                inset 0 0 20px #000;
+            box-shadow: 5px 5px 15px #070b15, -5px -5px 15px #1f2b45, inset 0 0 20px #000;
             user-select: none;
         }
         .dial-track {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 180px; height: 180px; border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.1);
-            pointer-events: none;
+            border: 2px solid rgba(255,255,255,0.1); pointer-events: none;
         }
         .dial-letter {
             position: absolute; width: 40px; height: 40px;
             text-align: center; line-height: 40px; 
-            color: #94a3b8; font-weight: bold; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem;
+            color: #94a3b8; font-weight: bold; font-family: monospace; font-size: 1.2rem;
             pointer-events: none; transform-origin: center center;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .dial-knob {
             position: absolute; top: 50%; left: 50%;
             width: 170px; height: 170px; margin-left: -85px; margin-top: -85px;
-            background: #151e32;
-            border-radius: 50%;
-            box-shadow: 
-                0 4px 10px rgba(0,0,0,0.5),
-                inset 0 1px 1px rgba(255,255,255,0.1);
-            z-index: 10; cursor: grab;
-            display: flex; align-items: center; justify-content: center;
+            background: #151e32; border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+            z-index: 10; cursor: grab; display: flex; align-items: center; justify-content: center;
             border: 1px solid #334155;
         }
-        .dial-knob:active { cursor: grabbing; border-color: #d946ef; } /* Active color match button */
-        
+        .dial-knob:active { cursor: grabbing; border-color: #d946ef; }
         .dial-pointer {
             position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
             width: 0; height: 0;
-            border-left: 12px solid transparent;
-            border-right: 12px solid transparent;
-            border-bottom: 20px solid #fbbf24;
+            border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 20px solid #fbbf24;
             filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6));
         }
 
         .term-input {
             background: transparent; border: none; border-bottom: 2px solid #334155;
-            color: #d946ef; outline: none; transition: all 0.3s;
-            font-family: 'JetBrains Mono', monospace;
+            color: #d946ef; outline: none; transition: all 0.3s; font-family: monospace;
         }
         .term-input:focus { border-bottom-color: #d946ef; background: rgba(217, 70, 239, 0.05); }
 
         .ntu-card {
-            background: #151e32;
-            border: 1px solid #1e293b;
-            border-radius: 0.5rem;
+            background: #151e32; border: 1px solid #1e293b; border-radius: 0.5rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
-
+        
+        /* 捲軸美化 */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+        /* 字母方格 */
+        .word-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; font-family: monospace; }
+        .word-cell {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            background: #1e293b; border: 1px solid #334155; color: #94a3b8;
+            font-weight: bold; font-size: 1.2rem; cursor: pointer; transition: all 0.2s;
+        }
+        .word-cell:hover { background: #334155; color: white; }
+        .word-cell.marked { background: #0ea5e9; color: #0f172a; border-color: #38bdf8; }
     </style>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ntu: {
+                            bg: '#0b1121', card: '#151e32', accent: '#38bdf8', border: '#1e293b', yellow: '#fbbf24',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(56, 189, 248, 0.5)',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="h-screen flex flex-col items-center justify-center relative">
+<body class="h-screen flex flex-col items-center justify-center relative" style="background-color: #0b1121;">
 
     <div class="scanline fixed inset-0 h-full w-full pointer-events-none"></div>
     <div class="neon-glow"></div>
 
     <!-- Header -->
-    <header class="fixed top-0 w-full bg-ntu-bg/90 backdrop-blur-md border-b border-ntu-border z-50 p-4 flex justify-between items-center">
+    <header class="fixed top-0 w-full bg-ntu-bg/90 backdrop-blur-md border-b border-ntu-border z-50 p-4 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-2">
             <span class="text-fuchsia-500 font-bold text-lg select-none">&gt;_</span>
             <span class="mono font-bold text-gray-100 tracking-wider">NTU_SYSTEM</span>
@@ -183,20 +166,21 @@
     </header>
 
     <!-- Main Content -->
-    <main id="app-container" class="w-full max-w-md h-full pt-20 pb-24 px-4 overflow-y-auto relative scroll-smooth">
+    <!-- Added pb-32 to ensure bottom content isn't covered by nav -->
+    <main id="app-container" class="w-full max-w-md h-full pt-20 pb-32 px-4 overflow-y-auto relative scroll-smooth">
         <!-- JS Render Content -->
     </main>
 
     <!-- Bottom Nav -->
-    <nav class="fixed bottom-0 w-full max-w-md bg-ntu-bg border-t border-ntu-border p-3 grid grid-cols-3 gap-6 z-40">
-        <button onclick="app.navigate('mission')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition active-nav">
-            <i class="fa-solid fa-location-arrow text-lg"></i> <span class="text-[10px] mono">當前任務</span>
+    <nav class="fixed bottom-0 w-full max-w-md bg-ntu-bg border-t border-ntu-border p-3 grid grid-cols-3 gap-6 z-40 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+        <button onclick="app.navigate('mission')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition active-nav group">
+            <i class="fa-solid fa-location-arrow text-xl group-active:scale-95"></i> <span class="text-[10px] mono">當前任務</span>
         </button>
-        <button onclick="app.navigate('clues')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition">
-            <i class="fa-solid fa-key text-lg"></i> <span class="text-[10px] mono">金鑰碎片</span>
+        <button onclick="app.navigate('clues')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition group">
+            <i class="fa-solid fa-key text-xl group-active:scale-95"></i> <span class="text-[10px] mono">金鑰碎片</span>
         </button>
-        <button onclick="app.navigate('final')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition">
-            <i class="fa-solid fa-lock text-lg"></i> <span class="text-[10px] mono">終端解碼</span>
+        <button onclick="app.navigate('final')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition group">
+            <i class="fa-solid fa-lock text-xl group-active:scale-95"></i> <span class="text-[10px] mono">終端解碼</span>
         </button>
     </nav>
 
@@ -206,7 +190,7 @@
     </div>
 
     <script>
-        const ADMIN_PASS = '8888'; // 管理員救援密碼
+        const ADMIN_PASS = '8888'; 
 
         const STAGES = {
             'gate': {
@@ -214,7 +198,7 @@
                 lat: 25.017400, lon: 121.533900, 
                 hintTitle: '知識的入口',
                 hintDesc: '所有旅程的起點，昔日的帝國大學門戶。',
-                hintImage: 'images/gate.jpg', // 修改為本地路徑
+                hintImage: 'images/gate.jpg', 
                 icon: 'fa-torii-gate', title: '時光刻度',
                 desc: '請轉動圓盤，依發生年代將校史事件排序。',
                 difficultyLabel: '歷史排序', type: 'lock'
@@ -224,7 +208,7 @@
                 lat: 25.018500, lon: 121.539000, 
                 hintTitle: '熱帶的守望者',
                 hintDesc: '筆直的大道，兩旁高聳的植物見證了無數學子的來去。',
-                hintImage: 'images/palm.jpg', // 修改為本地路徑
+                hintImage: 'images/palm.jpg', 
                 icon: 'fa-tree', title: '光譜密碼',
                 desc: '尋找隱藏在椰林光影中的「台大紅」。請根據數學線索調配出正確的 RGB 數值。',
                 difficultyLabel: '色彩數學', type: 'color'
@@ -234,7 +218,7 @@
                 lat: 25.018000, lon: 121.538500, 
                 hintTitle: '時間的警鐘',
                 hintDesc: '為了紀念一位偉大的校長，這裡的鐘聲總是敲響21下。',
-                hintImage: 'images/bell.jpg', // 修改為本地路徑
+                hintImage: 'images/bell.jpg', 
                 icon: 'fa-bell', title: '聲速奧秘',
                 desc: '分辨真假傅鐘的聲響，計算音速與時間差。',
                 difficultyLabel: '物理數學', type: 'physics'
@@ -244,7 +228,7 @@
                 lat: 25.022200, lon: 121.536900, 
                 hintTitle: '古典競技場',
                 hintDesc: '校園中最古老的體育建築，門口的羅馬柱是其特徵。',
-                hintImage: 'images/gym.jpg', // 修改為本地路徑
+                hintImage: 'images/gym.jpg', 
                 icon: 'fa-dumbbell', title: '函數極值',
                 desc: '彈道軌跡隱藏在古老的建築結構中。尋找三次函數的局部最低點。',
                 difficultyLabel: '數學微積分', type: 'math'
@@ -254,7 +238,7 @@
                 lat: 25.021000, lon: 121.537000, 
                 hintTitle: '詩人的倒影',
                 hintDesc: '校園中的一抹碧波，湖心亭是其標誌。',
-                hintImage: 'images/lake.jpg', // 修改為本地路徑
+                hintImage: 'images/lake.jpg', 
                 icon: 'fa-water', title: '光學推演', 
                 desc: '分析場景中的物理條件（光源、反射介質），推導出李白觀測到的光學成像結果。',
                 difficultyLabel: '物理文學', type: 'literature'
@@ -264,7 +248,7 @@
                 lat: 25.017340, lon: 121.540560, 
                 hintTitle: '知識的堡壘',
                 hintDesc: '校園的幾何中心，保存著百萬藏書的宏偉建築。',
-                hintImage: 'images/library.jpg', // 修改為本地路徑
+                hintImage: 'images/library.jpg', 
                 icon: 'fa-book', title: '三角測量',
                 desc: '利用俯角觀測數據，計算建築物的距離與高度。',
                 difficultyLabel: '數學幾何', type: 'math'
@@ -274,7 +258,7 @@
                 lat: 25.019500, lon: 121.540800, 
                 hintTitle: '甜蜜的角落',
                 hintDesc: '排隊人潮總是絡繹不絕，空氣中飄散著鬆餅的香氣。',
-                hintImage: 'images/waffle.jpg', // 修改為本地路徑
+                hintImage: 'images/waffle.jpg', 
                 icon: 'fa-utensils', title: '音律食材',
                 desc: '美味秘密藏在旋律裡。聆聽音符辨識音名，拼出英文食材單字。',
                 difficultyLabel: '音樂聽寫', type: 'music'
@@ -284,7 +268,7 @@
                 lat: 25.015500, lon: 121.534000, 
                 hintTitle: '地下的脈動',
                 hintDesc: '校園旁的交通樞紐，四通八達的捷運路網。',
-                hintImage: 'images/subway.jpg', // 修改為本地路徑
+                hintImage: 'images/subway.jpg', 
                 icon: 'fa-train-subway', title: '捷運租屋',
                 desc: '奎哥想在學校附近租屋。請協助他篩選符合通勤條件的捷運站。',
                 difficultyLabel: '生活地理', type: 'checkbox'
@@ -441,7 +425,6 @@
             },
 
             renderIntro(container) {
-                // Generate 8 buttons
                 let buttonsHtml = '';
                 for(let i=1; i<=8; i++) {
                     buttonsHtml += `<button onclick="app.setTeam(${i})" class="p-4 bg-ntu-card border border-ntu-border rounded-lg hover:border-fuchsia-500 hover:shadow-[0_0_10px_rgba(217,70,239,0.5)] hover:text-fuchsia-400 transition duration-300 font-mono text-sm">小隊 0${i}</button>`;
@@ -538,7 +521,6 @@
                     `;
                 } else {
                     let mediaHtml = '';
-                    if (s.youtube) mediaHtml += `<div class="mb-4 rounded overflow-hidden border border-ntu-border shadow-lg"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${s.youtube}" frameborder="0" allowfullscreen></iframe></div>`;
                     if (s.image) mediaHtml += `<div class="mb-4 rounded overflow-hidden border border-ntu-border shadow-lg"><img src="${s.image}" class="w-full object-cover"></div>`;
 
                     let puzzleHtml = '';
