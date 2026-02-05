@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- [關鍵修正] 允許執行 inline script 和 data URI 圖片 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
-    
     <title>Project: NTU_LEGACY | 台大實境解謎</title>
+    <!-- 設定網頁 Favicon -->
     <link rel="icon" type="image/png" href="images/logo.png">
     
     <!-- 引入字體與圖標 -->
@@ -14,11 +12,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- 基礎設定 (Reset & Variables) --- */
+        /* --- 核心變數 (Cyberpunk Theme) --- */
         :root {
             --bg-color: #0b1121;
             --card-bg: #151e32;
-            --border-color: #1e293b;
+            --border-color: #334155;
             --text-main: #e2e8f0;
             --text-sub: #94a3b8;
             --accent-cyan: #38bdf8;
@@ -34,16 +32,14 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             font-family: 'Noto Sans TC', sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             overflow: hidden;
             touch-action: manipulation;
         }
 
-        /* --- 工具類別 (Utilities) --- */
+        /* --- 共用樣式 --- */
         .mono { font-family: 'JetBrains Mono', monospace; }
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
@@ -70,50 +66,45 @@
             background: rgba(11, 17, 33, 0.95); backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 16px; z-index: 50; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 0 16px; z-index: 50; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .header-logo { display: flex; align-items: center; gap: 8px; font-weight: bold; }
         .header-logo span:first-child { color: var(--accent-pink); font-size: 1.2rem; }
         .header-controls { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; }
-        .team-badge { background: rgba(217, 70, 239, 0.1); color: var(--accent-pink); padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .team-badge { background: rgba(217, 70, 239, 0.1); color: var(--accent-pink); padding: 4px 8px; border-radius: 4px; font-weight: bold; font-family: 'JetBrains Mono', monospace;}
         .reset-btn { background: none; border: none; color: var(--danger); cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.8rem; }
 
-        /* --- Main Content --- */
+        /* --- Main --- */
         main {
             flex: 1; width: 100%; max-width: 480px; margin: 0 auto;
-            padding: 80px 16px 100px 16px; /* Top padding for header, Bottom for nav */
+            padding: 80px 16px 120px 16px;
             overflow-y: auto; position: relative; z-index: 10;
         }
 
-        /* --- Navigation --- */
+        /* --- Nav --- */
         nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; height: 70px;
             background: var(--bg-color); border-top: 1px solid var(--border-color);
             display: grid; grid-template-columns: 1fr 1fr 1fr;
-            z-index: 50; max-width: 480px; left: 50%; transform: translateX(-50%);
+            z-index: 50; box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
         nav button {
             background: none; border: none; color: var(--text-sub);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 4px; font-size: 0.7rem; cursor: pointer; transition: color 0.3s;
         }
-        nav button i { font-size: 1.2rem; }
-        nav button.active { color: var(--accent-pink); }
+        nav button i { font-size: 1.4rem; margin-bottom: 2px; }
+        nav button.active { color: var(--accent-pink); text-shadow: 0 0 10px rgba(217, 70, 239, 0.3); }
 
-        /* --- Cards & Containers --- */
+        /* --- Elements --- */
         .card {
             background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 12px; padding: 20px; margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden;
         }
-        .section-title {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 16px; border-left: 4px solid var(--accent-pink); padding-left: 12px;
-        }
-        .section-title h2 { margin: 0; font-size: 1.2rem; color: white; }
-        .section-info { font-size: 0.75rem; color: var(--text-sub); }
-
-        /* --- Neon Button --- */
+        
         .btn-neon {
             width: 100%; padding: 14px;
             background: linear-gradient(90deg, #d946ef 0%, #7c3aed 100%);
@@ -124,60 +115,36 @@
             transition: transform 0.2s, box-shadow 0.2s;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn-neon:active { transform: scale(0.98); }
-        
+        .btn-neon:active { transform: scale(0.98); box-shadow: 0 0 5px rgba(217, 70, 239, 0.4); }
+
         .btn-secondary {
             width: 100%; padding: 12px;
-            background: var(--bg-color); border: 1px solid var(--border-color);
+            background: transparent; border: 1px solid var(--border-color);
             color: var(--text-sub); border-radius: 8px; font-weight: bold;
             cursor: pointer; transition: all 0.2s;
         }
+        .btn-secondary:hover { border-color: var(--text-sub); color: white; }
 
-        /* --- Inputs --- */
         .input-field {
-            width: 100%; background: transparent; border: none;
+            width: 100%; background: rgba(0,0,0,0.2); border: none;
             border-bottom: 2px solid var(--border-color);
-            color: var(--accent-pink); font-size: 1.2rem; text-align: center;
+            color: var(--accent-pink); font-size: 1.5rem; text-align: center;
             padding: 10px; outline: none; font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase; letter-spacing: 2px;
-            transition: all 0.3s;
+            text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
         }
         .input-field:focus { border-bottom-color: var(--accent-pink); background: rgba(217, 70, 239, 0.05); }
 
-        /* --- Grid Layouts --- */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .section-title {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; border-left: 4px solid var(--accent-pink); padding-left: 12px;
+        }
+        .section-title h2 { margin: 0; font-size: 1.2rem; color: white; }
 
-        /* --- Specific Puzzles --- */
-        /* Dial */
-        .dial-wrapper {
-            position: relative; width: 280px; height: 280px; margin: 20px auto;
-            border-radius: 50%; background: linear-gradient(145deg, #1a233a, #0f1623);
-            border: 12px solid var(--border-color);
-            box-shadow: 5px 5px 15px #070b15, -5px -5px 15px #1f2b45, inset 0 0 20px #000;
-            user-select: none;
+        .img-container {
+            width: 100%; height: 200px; border-radius: 8px; overflow: hidden;
+            border: 1px solid var(--border-color); margin-bottom: 16px; background: #000;
         }
-        .dial-knob {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 170px; height: 170px; border-radius: 50%;
-            background: var(--card-bg); border: 1px solid #334155;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 10; cursor: grab;
-        }
-        .dial-knob:active { cursor: grabbing; border-color: var(--accent-pink); }
-        .dial-pointer {
-            position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0;
-            border-left: 12px solid transparent; border-right: 12px solid transparent;
-            border-bottom: 20px solid var(--accent-yellow);
-        }
-        .dial-letter {
-            position: absolute; width: 30px; height: 30px;
-            text-align: center; line-height: 30px; color: var(--text-sub);
-            font-weight: bold; font-family: monospace; font-size: 1.2rem;
-            pointer-events: none; transform-origin: center center;
-        }
+        .img-cover { width: 100%; height: 100%; object-fit: cover; }
 
         /* Toast */
         #toast {
@@ -185,39 +152,58 @@
             background: #1e293b; border: 1px solid var(--accent-pink); color: white;
             padding: 12px 24px; border-radius: 8px; z-index: 100;
             opacity: 0; transition: opacity 0.3s; pointer-events: none;
-            display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         #toast.show { opacity: 1; }
 
-        /* Intro Page */
-        .intro-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%; text-align: center; }
-        .logo-box { 
-            width: 120px; height: 120px; border-radius: 50%; overflow: hidden; 
-            border: 4px solid rgba(217, 70, 239, 0.5); 
-            box-shadow: 0 0 20px rgba(217, 70, 239, 0.3); margin-bottom: 20px;
+        /* Grid Helpers */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+
+        /* Dial Puzzle Specific */
+        .dial-wrapper {
+            position: relative; width: 260px; height: 260px; margin: 20px auto;
+            border-radius: 50%; background: linear-gradient(145deg, #1a233a, #0f1623);
+            border: 10px solid var(--border-color);
+            box-shadow: inset 0 0 20px #000;
+            user-select: none;
         }
-        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
-        .title-main { font-size: 2rem; font-weight: bold; color: var(--accent-pink); letter-spacing: 0.2em; text-shadow: 0 0 10px rgba(217, 70, 239, 0.5); margin-bottom: 40px; }
+        .dial-track {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 170px; height: 170px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.05); pointer-events: none;
+        }
+        .dial-knob {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 160px; height: 160px; border-radius: 50%;
+            background: var(--card-bg); border: 1px solid #334155;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; cursor: grab;
+        }
+        .dial-knob:active { cursor: grabbing; border-color: var(--accent-pink); }
+        .dial-pointer {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-bottom: 18px solid var(--accent-yellow);
+        }
+        .dial-letter {
+            position: absolute; width: 30px; height: 30px;
+            text-align: center; line-height: 30px; color: var(--text-sub);
+            font-weight: bold; font-family: 'JetBrains Mono', monospace;
+            pointer-events: none; transform-origin: center center;
+        }
 
-        /* Helpers */
-        .text-center { text-align: center; }
-        .text-accent { color: var(--accent-pink); }
-        .text-sub { color: var(--text-sub); font-size: 0.85rem; }
-        .w-full { width: 100%; }
-        .mb-2 { margin-bottom: 8px; }
-        .mb-4 { margin-bottom: 16px; }
-        .mt-2 { margin-top: 8px; }
-        .mt-4 { margin-top: 16px; }
-        .relative { position: relative; }
-        .img-container { width: 100%; height: 200px; overflow: hidden; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 16px; }
-        .img-cover { width: 100%; height: 100%; object-fit: cover; }
-
-        /* Checkbox Override */
-        input[type="checkbox"] { width: 1.2rem; height: 1.2rem; margin-right: 8px; accent-color: var(--accent-pink); }
-        .checkbox-label { display: flex; align-items: center; padding: 10px; background: var(--border-color); border-radius: 6px; cursor: pointer; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+        /* Checkbox Custom */
+        .checkbox-group label {
+            display: flex; align-items: center; padding: 12px;
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border-color);
+            border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;
+        }
+        .checkbox-group label:hover { border-color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
+        .checkbox-group input { margin-right: 12px; width: 18px; height: 18px; accent-color: var(--accent-cyan); }
     </style>
 </head>
 <body>
@@ -255,7 +241,7 @@
         </button>
     </nav>
 
-    <!-- Toast -->
+    <!-- Toast Notification -->
     <div id="toast">
         <i class="fa-solid fa-circle-info"></i> <span id="toast-msg">Message</span>
     </div>
@@ -505,7 +491,7 @@
             renderIntro(container) {
                 let buttonsHtml = '';
                 for(let i=1; i<=8; i++) {
-                    buttonsHtml += `<button onclick="app.setTeam(${i})" class="btn-secondary">小隊 0${i}</button>`;
+                    buttonsHtml += `<button onclick="app.setTeam(${i})" class="btn-secondary" style="margin-bottom:10px;">小隊 0${i}</button>`;
                 }
 
                 container.innerHTML = `
@@ -518,7 +504,7 @@
 
                         <div class="w-full max-w-xs space-y-4">
                             <p class="text-sub mb-6">請選擇小隊編號以存取資料庫</p>
-                            <div class="grid-2">${buttonsHtml}</div>
+                            <div class="grid-2" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">${buttonsHtml}</div>
                         </div>
                     </div>`;
             },
@@ -530,7 +516,7 @@
                 if (currentIndex >= route.length) {
                     container.innerHTML = `
                         <div class="intro-container fade-in">
-                            <div class="w-20 h-20 rounded-full bg-transparent border border-accent-cyan flex items-center justify-center mb-6" style="border-color:var(--accent-yellow)">
+                            <div style="width:80px; height:80px; border-radius:50%; border:2px solid var(--accent-yellow); display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
                                 <i class="fa-solid fa-flag-checkered text-4xl" style="color:var(--accent-yellow)"></i>
                             </div>
                             <h2 style="font-size:1.5rem; margin-bottom:10px;">任務全數完成</h2>
@@ -761,8 +747,8 @@
                     prog.innerHTML = '';
                     for(let i=0; i<7; i++) {
                         const isLocked = i < this.state.gateLockIndex;
-                        const cls = isLocked ? 'bg-fuchsia-600 text-white border-fuchsia-400' : 'bg-ntu-card text-slate-600 border-ntu-border';
-                        prog.innerHTML += `<div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:4px; font-weight:bold; background:${isLocked?'var(--accent-pink)':'var(--card-bg)'}; color:${isLocked?'white':'var(--text-sub)'}; border:1px solid ${isLocked?'var(--accent-pink)':'var(--border-color)'}">${isLocked ? this.state.gateLockSequence[i] : '?'}</div>`;
+                        const cls = isLocked ? 'background:var(--accent-pink); color:white; border:1px solid var(--accent-pink);' : 'background:var(--card-bg); color:var(--text-sub); border:1px solid var(--border-color);';
+                        prog.innerHTML += `<div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:4px; font-weight:bold; font-size:1.2rem; font-family:monospace; ${cls}">${isLocked ? this.state.gateLockSequence[i] : '?'}</div>`;
                     }
                 }
             },
@@ -799,7 +785,7 @@
             getSubwayPuzzle() {
                 const opts = ['台北車站', '新店', '秀朗橋', '南勢角', '雙連', '忠孝復興', '龍山寺', '中和', '行天宮', '小碧潭'];
                 let h = `<div class="card mb-4"><p class="text-sub" style="margin-bottom:16px; line-height:1.6;"><span class="text-accent" style="font-weight:bold;">租屋篩選條件：</span><br>1. 離學校(公館) 6 站捷運以內<br>2. 最多只需要換線 1 次</p><div class="grid-2">`;
-                opts.forEach(o => h += `<label class="checkbox-label"><input type="checkbox" name="subway-opt" value="${o}"><span style="font-size:0.8rem; color:var(--text-main);">${o}</span></label>`);
+                opts.forEach(o => h += `<label class="checkbox-group"><input type="checkbox" name="subway-opt" value="${o}"><span style="font-size:0.8rem; color:var(--text-main);">${o}</span></label>`);
                 return h + `</div></div><button onclick="app.checkSubwayAns()" class="btn-neon">提交驗證</button>`;
             },
             checkSubwayAns() {
@@ -815,11 +801,7 @@
                 return `<div class="card text-center mb-4"><p class="text-sub" style="text-align:left; margin-bottom:16px;">修正方程式：$f(x) = x^3 - 3x + 1$。請計算此函數在 $x > 0$ 區域內的局部極小值是多少？</p><input type="text" id="ans-gym" placeholder="輸入數值" class="input-field"></div><button onclick="app.checkAnswer('gym', 'ans-gym', '-1')" class="btn-neon">提交驗證</button>`;
             },
 
-            highlightError(id) {
-                const el = document.getElementById(id);
-                el.style.borderBottomColor = 'var(--danger)'; 
-                setTimeout(() => el.style.borderBottomColor = 'var(--border-color)', 1000);
-            },
+            highlightError(id) { const el = document.getElementById(id); el.style.borderBottomColor = 'var(--danger)'; setTimeout(()=>el.style.borderBottomColor = 'var(--border-color)', 1000); },
             checkAnswer(id, inp, ans) { const v = document.getElementById(inp).value.trim().toUpperCase(); if (v === ans.toString()) this.completeStage(id); else { this.toast('答案錯誤'); this.highlightError(inp); } },
             checkAnswerText(id, inp, anss) { const v = document.getElementById(inp).value.trim(); if (anss.includes(v)) this.completeStage(id); else { this.toast('答案錯誤'); this.highlightError(inp); } },
             completeStage(id) {
