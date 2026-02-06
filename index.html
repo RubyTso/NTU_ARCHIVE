@@ -730,7 +730,7 @@
                 return `
                     <div class="text-center mb-6">
                         <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-ntu-bg border border-ntu-border mb-3 shadow-lg"><i class="fa-solid fa-music text-2xl text-purple-400"></i></div>
-                        <p class="text-sm text-slate-300">聆聽旋律拼出英文單字（基準音 C=Do）。</p>
+                        <p class="text-sm text-slate-300">聆聽旋律拼出英文單字（Do=C, Re=D, Mi=E, Fa=F, So=G, LA=A, Ti=B）。</p>
                     </div>
                     <div class="space-y-4 mb-6">
                         ${['E,G,G','B,E,E,F','C,A,B,B,A,G,E'].map((n, i) => `<div class="bg-ntu-bg border border-ntu-border p-4 rounded flex items-center gap-3"><button onclick="app.playMelody(['${n.split(',').join("','")}'])" class="bg-purple-600 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-play text-xs text-white"></i></button><input type="text" id="waffle-q${i+1}" class="term-input flex-1 p-1 text-center uppercase" placeholder="TYPE HERE"></div>`).join('')}
@@ -751,7 +751,7 @@
                             <p class="font-bold text-white mb-2">事件紀錄：</p>
                             <ul class="list-disc list-inside text-slate-400 text-xs space-y-2 leading-relaxed">
                                 <li>環境氣溫：<span class="text-fuchsia-400">15°C</span></li>
-                                <li>傅鐘：間隔 <span class="text-fuchsia-400">3秒</span>，共 <span class="text-fuchsia-400">21下</span></li>
+                                <li>傅鐘：每下間隔 <span class="text-fuchsia-400">3秒</span></li>
                                 <li>位置：距真傅鐘 <span class="text-fuchsia-400">1700m</span></li>
                                 <li>干擾：假喇叭在中間，距奎哥近 <span class="text-fuchsia-400">200m</span></li>
                                 <li>觀測：假鐘第一聲比真鐘早 <span class="text-fuchsia-400">12秒</span></li>
@@ -833,7 +833,7 @@
                         <p class="text-sm text-slate-300 mb-4 text-left font-mono">f(x) = x³ - 3x + 1<br>計算此函數在 x > 0 區域內的局部極小值。</p>
                         <input type="text" id="ans-gym" placeholder="輸入數值" class="term-input w-full p-2 text-center text-lg mb-4">
                     </div>
-                    <button onclick="app.checkAnswer('gym', 'ans-gym', '-1')" class="w-full btn-neon py-3">提交驗證</button>`;
+                    <button onclick="app.checkAnswer('gym', 'ans-gym', '1')" class="w-full btn-neon py-3">提交驗證</button>`;
             },
 
             checkAnswer(id, inp, ans) {
