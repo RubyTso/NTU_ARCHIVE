@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Project: NTU_ARCHIVE | 台大校園實境解謎</title>
+    <title>Project: NTU_LEGACY | 台大實境解謎</title>
     <!-- 設定網頁 Favicon (瀏覽器分頁圖示) -->
     <link rel="icon" type="image/png" href="images/logo.png">
     
@@ -63,7 +63,6 @@
                 radial-gradient(circle at 90% 80%, rgba(192, 38, 211, 0.05) 0%, transparent 40%);
         }
 
-        /* 全新霓虹按鈕樣式 */
         .btn-neon {
             background: linear-gradient(90deg, #d946ef 0%, #7c3aed 100%); 
             color: white;
@@ -93,7 +92,6 @@
             pointer-events: none;
         }
 
-        /* 轉盤樣式 */
         .dial-container {
             position: relative; width: 280px; height: 280px; margin: 0 auto;
             border-radius: 50%; 
@@ -203,14 +201,13 @@
     </div>
 
     <script>
-        // 定義每一關獨立的救援密碼
         const STAGES = {
             'gate': {
                 id: 'gate', name: '台大校門', code: '2',
-                lat: 25.017014, lon: 121.533854,
-                rescueCode: 'NTU1928', // 專屬救援碼
+                lat: 25.017400, lon: 121.533900, 
+                rescueCode: 'NTU1928',
                 hintTitle: '知識的入口',
-                hintDesc: '大學生涯的起點，昔日的帝國大學門戶。',
+                hintDesc: '所有旅程的起點，昔日的帝國大學門戶。',
                 hintImage: 'images/gate.jpg', 
                 icon: 'fa-torii-gate', title: '時光刻度',
                 desc: '請轉動圓盤，依發生年代將校史事件排序。',
@@ -218,7 +215,7 @@
             },
             'palm': {
                 id: 'palm', name: '椰林大道', code: '2', 
-                lat: 25.017278, lon: 121.534977, 
+                lat: 25.018500, lon: 121.539000, 
                 rescueCode: 'PALM96', 
                 hintTitle: '熱帶的守望者',
                 hintDesc: '筆直的大道，兩旁高聳的植物見證了無數學子的來去。',
@@ -229,18 +226,18 @@
             },
             'bell': {
                 id: 'bell', name: '傅鐘', code: '2',
-                lat: 25.017246, lon: 121.536768,
+                lat: 25.018000, lon: 121.538500, 
                 rescueCode: 'RING21',
                 hintTitle: '時間的警鐘',
-                hintDesc: '為了紀念一位偉大的校長，這裡的鐘聲總是依循他的名言敲響。',
+                hintDesc: '為了紀念一位偉大的校長，這裡的鐘聲總是敲響21下。',
                 hintImage: 'images/bell.jpg', 
                 icon: 'fa-bell', title: '聲速奧秘',
-                desc: '期末考這天，奎哥第一節課快遲到，學校規定：只有當傅鐘「最後一下敲完」那一刻才算遲到。他在路口時聽到鐘聲，卻發現有人惡作劇放了「假傅鐘」喇叭，播放幾乎一樣的鐘聲來混淆同學。請你協助他分辨真假傅鐘的聲響，計算音速與時間差。',
+                desc: '分辨真假傅鐘的聲響，計算音速與時間差。',
                 difficultyLabel: '物理數學', type: 'physics'
             },
             'gym': {
                 id: 'gym', name: '舊體育館', code: 'D',
-                lat: 25.020000, lon: 121.536569,
+                lat: 25.022200, lon: 121.536900, 
                 rescueCode: 'OLDGYM7',
                 hintTitle: '古典競技場',
                 hintDesc: '校園中最古老的體育建築，門口的羅馬柱是其特徵。',
@@ -252,7 +249,7 @@
             'lake': {
                 id: 'lake', name: '醉月湖', code: 'L',
                 rescueCode: 'MOON33',
-                lat: 25.020571, lon: 121.537626,
+                lat: 25.021000, lon: 121.537000, 
                 hintTitle: '詩人的倒影',
                 hintDesc: '校園中的一抹碧波，湖心亭是其標誌。',
                 hintImage: 'images/lake.jpg', 
@@ -263,34 +260,34 @@
             'library': {
                 id: 'library', name: '總圖書館', code: 'C',
                 rescueCode: 'READ88',
-                lat: 25.017392, lon: 121.540527,
+                lat: 25.017340, lon: 121.540560, 
                 hintTitle: '知識的堡壘',
                 hintDesc: '校園的幾何中心，保存著百萬藏書的宏偉建築。',
                 hintImage: 'images/library.jpg', 
                 icon: 'fa-book', title: '三角測量',
-                desc: '奎哥從台大總圖書館樓頂觀測校園，請利用俯角觀測數據，計算建築物的距離與高度。',
+                desc: '利用俯角觀測數據，計算建築物的距離與高度。',
                 difficultyLabel: '數學幾何', type: 'math'
             },
             'waffle': {
                 id: 'waffle', name: '小木屋', code: '0', 
                 rescueCode: 'YUMMY00',
-                lat: 25.015684, lon: 121.537550,
+                lat: 25.019500, lon: 121.540800, 
                 hintTitle: '甜蜜的角落',
                 hintDesc: '排隊人潮總是絡績不絕，空氣中飄散著鬆餅的香氣。',
                 hintImage: 'images/waffle.jpg', 
                 icon: 'fa-utensils', title: '音律食材',
-                desc: '美味秘密藏在旋律裡。聆聽音符辨識「音名」，拼出英文食材單字。',
+                desc: '美味秘密藏在旋律裡。聆聽音符辨識音名，拼出英文食材單字。',
                 difficultyLabel: '音樂聽寫', type: 'music'
             },
             'subway': {
                 id: 'subway', name: '公館捷運', code: 'E',
                 rescueCode: 'EXIT3',
-                lat: 25.014711, lon: 121.534687,
+                lat: 25.015500, lon: 121.534000, 
                 hintTitle: '地下的脈動',
                 hintDesc: '校園旁的交通樞紐，四通八達的捷運路網。',
                 hintImage: 'images/subway.jpg', 
                 icon: 'fa-train-subway', title: '捷運租屋',
-                desc: '奎哥就讀「台灣大學」他想在學校附近租屋。請協助他篩選符合通勤條件的捷運站。',
+                desc: '奎哥想在學校附近租屋。請協助他篩選符合通勤條件的捷運站。',
                 difficultyLabel: '生活地理', type: 'checkbox'
             }
         };
@@ -353,7 +350,6 @@
                 const a = localStorage.getItem('ntu_puzzle_arrived');
                 const s = localStorage.getItem('ntu_puzzle_scores');
                 const t = localStorage.getItem('ntu_puzzle_start_times');
-                
                 if (team) {
                     this.state.teamId = parseInt(team);
                     if (c) this.state.completedStages = JSON.parse(c);
@@ -440,12 +436,10 @@
                 if (!container) return;
                 container.innerHTML = '';
                 this.updateUI();
-                
                 if (!this.state.teamId) {
                     this.renderIntro(container);
                     return;
                 }
-
                 if(this.state.currentView === 'intro') this.navigate('mission'); 
                 else if(this.state.currentView === 'mission') this.renderMission(container);
                 else if(this.state.currentView === 'clues') this.renderClues(container);
@@ -457,25 +451,17 @@
                 for(let i=1; i<=8; i++) {
                     buttonsHtml += `<button onclick="app.setTeam(${i})" class="p-4 bg-ntu-card border border-ntu-border rounded-lg hover:border-fuchsia-500 hover:shadow-[0_0_10px_rgba(217,70,239,0.5)] hover:text-fuchsia-400 transition duration-300 font-mono text-sm">小隊 0${i}</button>`;
                 }
-
                 container.innerHTML = `
                     <div class="flex flex-col items-center justify-center min-h-full py-10 space-y-6 fade-in relative z-10">
                         <div class="absolute w-64 h-64 bg-fuchsia-500/20 rounded-full blur-[80px] -z-10"></div>
-                        
                         <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-fuchsia-500/50 shadow-[0_0_20px_rgba(217,70,239,0.3)] relative group">
                             <div class="absolute inset-0 bg-fuchsia-500/10 group-hover:bg-transparent transition"></div>
                             <img src="images/logo.png" alt="Team Logo" class="w-full h-full object-cover p-1 bg-white/10 backdrop-blur-sm">
                         </div>
-                        
-                        <div class="text-3xl font-mono text-fuchsia-400 font-bold tracking-[0.3em] drop-shadow-neon mt-2 text-center">
-                            NTU ARCHIVE
-                        </div>
-
+                        <div class="text-3xl font-mono text-fuchsia-400 font-bold tracking-[0.3em] drop-shadow-neon mt-2 text-center">NTU ARCHIVE</div>
                         <div class="w-full max-w-xs space-y-4">
                             <p class="text-slate-400 text-sm mb-6 text-center">請選擇小隊編號以存取資料庫</p>
-                            <div class="grid grid-cols-2 gap-4">
-                                ${buttonsHtml}
-                            </div>
+                            <div class="grid grid-cols-2 gap-4">${buttonsHtml}</div>
                         </div>
                     </div>`;
             },
@@ -483,7 +469,6 @@
             renderMission(container) {
                 const route = TEAM_ROUTES[this.state.teamId];
                 const currentIndex = this.state.completedStages.length;
-                
                 if (currentIndex >= route.length) {
                     container.innerHTML = `
                         <div class="h-full flex flex-col items-center justify-center text-center fade-in">
@@ -492,21 +477,14 @@
                             </div>
                             <h2 class="text-2xl font-bold text-white mb-2">任務全數完成</h2>
                             <p class="text-slate-400 mb-8 text-sm">所有資料碎片已收集完畢。<br>請前往終端解碼以完成任務。</p>
-                            <button onclick="app.navigate('final')" class="px-8 py-4 btn-neon w-64 shadow-lg">
-                                <i class="fa-solid fa-terminal mr-2"></i> 前往終端機
-                            </button>
-                        </div>
-                    `;
+                            <button onclick="app.navigate('final')" class="px-8 py-4 btn-neon w-64 shadow-lg"><i class="fa-solid fa-terminal mr-2"></i> 前往終端機</button>
+                        </div>`;
                     return;
                 }
-
                 const currentStageId = route[currentIndex];
                 const s = STAGES[currentStageId];
                 const isArrived = this.state.arrivedStages.includes(currentStageId);
-
-                let content = '';
-                
-                content += `
+                let content = `
                     <div class="mb-6 flex items-center justify-between">
                         <div>
                             <div class="text-xs font-mono text-fuchsia-400 mb-1">CURRENT_MISSION</div>
@@ -515,8 +493,7 @@
                         <div class="text-xs px-2 py-1 rounded border border-ntu-border bg-ntu-card text-slate-400">
                             ${isArrived ? `<i class="fa-solid fa-location-dot text-fuchsia-400 mr-1"></i> ${s.name}` : '<i class="fa-solid fa-lock text-slate-600 mr-1"></i> 地點加密'}
                         </div>
-                    </div>
-                `;
+                    </div>`;
 
                 if (!isArrived) {
                     content += `
@@ -533,20 +510,14 @@
                                 </div>
                                 <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-ntu-border pl-3">${s.hintDesc}</p>
                             </div>
-                            
                             <div class="border-t border-ntu-border pt-6 text-center">
-                                <button onclick="app.verifyLocation('${s.id}')" class="w-full btn-neon py-4 text-lg flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-satellite-dish"></i> 掃描目前位置
-                                </button>
+                                <button onclick="app.verifyLocation('${s.id}')" class="w-full btn-neon py-4 text-lg flex items-center justify-center gap-2"><i class="fa-solid fa-satellite-dish"></i> 掃描目前位置</button>
                                 <div id="check-status" class="text-xs text-ntu-yellow mt-3 min-h-[3rem] font-mono whitespace-pre-line leading-relaxed"></div>
                                 <div class="mt-4">
-                                    <button onclick="app.requestAdminSkip('${s.id}')" class="text-[10px] text-slate-600 hover:text-slate-400 font-mono tracking-wider">
-                                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> 定位異常？(輸入該關救援碼)
-                                    </button>
+                                    <button onclick="app.requestAdminSkip('${s.id}')" class="text-[10px] text-slate-600 hover:text-slate-400 font-mono tracking-wider"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 定位異常？(輸入該關救援碼)</button>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 } else {
                     let puzzleHtml = '';
                     switch (s.id) {
@@ -559,7 +530,6 @@
                         case 'bell': puzzleHtml = this.getBellPuzzle(); break;
                         case 'palm': puzzleHtml = this.getPalmPuzzle(); break;
                     }
-
                     content += `
                         <div class="fade-in ntu-card p-5">
                             <div class="flex items-center justify-between mb-4 border-b border-ntu-border pb-3">
@@ -573,12 +543,9 @@
                             </div>
                             <div class="text-sm text-slate-300 mb-6 leading-relaxed">${s.desc}</div>
                             ${puzzleHtml}
-                        </div>
-                    `;
+                        </div>`;
                 }
-
                 container.innerHTML = content;
-
                 if(isArrived) {
                     if(s.id === 'library') this.initLibraryEvents(); 
                     if(s.id === 'waffle') this.initWaffleEvents();
@@ -591,40 +558,26 @@
                 const s = STAGES[id];
                 const stat = document.getElementById('check-status');
                 if (!stat) return;
-
-                // 視覺更新：倒數與提示
                 let timeLeft = 30; 
                 stat.textContent = `衛星連線中 (預計 ${timeLeft}s)...\n請確保位於室外空曠處並開啟 WiFi。`;
                 stat.className = "text-xs text-fuchsia-400 animate-pulse mt-3 min-h-[3rem] font-mono whitespace-pre-line";
-
                 const countdown = setInterval(() => {
                     timeLeft--;
-                    if (timeLeft > 0) {
-                        stat.textContent = `正在獲取座標 (預計 ${timeLeft}s)...\n環境遮蔽可能影響定位速度。`;
-                    } else {
-                        clearInterval(countdown);
-                    }
+                    if (timeLeft > 0) stat.textContent = `正在獲取座標 (預計 ${timeLeft}s)...\n環境遮蔽可能影響定位速度。`;
+                    else clearInterval(countdown);
                 }, 1000);
-
                 if (!navigator.geolocation) { 
                     clearInterval(countdown);
                     stat.textContent = "錯誤：瀏覽器不支援定位服務。"; 
                     stat.className = "text-xs text-red-500 mt-3 min-h-[3rem] font-mono";
                     return; 
                 }
-
-                // 第一次嘗試：高精準度 (30秒逾時)
-                const highAccuracyOptions = { 
-                    enableHighAccuracy: true, 
-                    timeout: 30000, 
-                    maximumAge: 0 
-                };
-
-                const successCallback = (p) => {
+                const options = { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 };
+                const success = (p) => {
                     clearInterval(countdown);
                     const dist = this.getDist(p.coords.latitude, p.coords.longitude, s.lat, s.lon) * 1000;
                     if (dist < 100) {
-                        stat.textContent = "✔ 訊號捕獲成功！\n位置匹配完成，正在解鎖系統節點...";
+                        stat.textContent = "✔ 訊號捕獲成功！\n位置匹配完成，正在解鎖資料節點...";
                         stat.className = "text-xs text-emerald-400 font-bold mt-3 min-h-[3rem] font-mono whitespace-pre-line";
                         setTimeout(() => this.forceArrive(id), 1200);
                     } else {
@@ -633,33 +586,20 @@
                         this.toast('距離過遠，請再靠近目標地點一些');
                     }
                 };
-
-                const errorCallback = (e) => {
+                const error = (e) => {
                     clearInterval(countdown);
-                    console.warn(`Geolocation Error (${e.code}): ${e.message}`);
-                    
-                    // 如果是逾時，且還沒試過低精度模式，則進行二次備案嘗試
                     if (e.code === e.TIMEOUT) {
                         stat.textContent = "高精度定位逾時，正在嘗試基礎定位模式...";
-                        navigator.geolocation.getCurrentPosition(successCallback, (e2) => {
-                            let msg = "定位失敗：請檢查手機 GPS 設定。";
-                            if (e2.code === e.PERMISSION_DENIED) msg = "權限被拒：請在瀏覽器設定中開啟位置存取。";
-                            else if (e2.code === e.TIMEOUT) msg = "讀取逾時：環境收訊過差，請移動到空曠處重試。";
-                            stat.textContent = msg;
-                            stat.className = "text-xs text-red-500 mt-3 min-h-[3rem] font-mono whitespace-pre-line";
+                        navigator.geolocation.getCurrentPosition(success, (e2) => {
+                            stat.textContent = "定位失敗：環境收訊過差，請移動到空曠處重試。";
+                            stat.className = "text-xs text-red-500 mt-3 min-h-[3rem] font-mono";
                         }, { enableHighAccuracy: false, timeout: 10000 });
                     } else {
-                        let errorMsg = "GPS 讀取失敗";
-                        switch(e.code) {
-                            case e.PERMISSION_DENIED: errorMsg = "權限被拒：請在設定中允許瀏覽器存取位置。"; break;
-                            case e.POSITION_UNAVAILABLE: errorMsg = "無法定位：請確認 GPS 已開啟且非飛航模式。"; break;
-                        }
-                        stat.textContent = errorMsg; 
-                        stat.className = "text-xs text-red-500 mt-3 min-h-[3rem] font-mono"; 
+                        stat.textContent = "GPS 讀取失敗，請確認權限與訊號。";
+                        stat.className = "text-xs text-red-500 mt-3 min-h-[3rem] font-mono";
                     }
                 };
-
-                navigator.geolocation.getCurrentPosition(successCallback, errorCallback, highAccuracyOptions);
+                navigator.geolocation.getCurrentPosition(success, error, options);
             },
 
             forceArrive(id) {
@@ -671,15 +611,24 @@
                 this.render();
             },
 
-            /* --- PUZZLES 邏輯節錄 --- */
+            // --- PUZZLES ---
+
             getPalmPuzzle() {
                 return `
                     <div class="bg-ntu-bg border border-ntu-border p-4 rounded mb-4">
+                        <div class="text-left text-sm text-slate-300 mb-6 space-y-2 border-l-2 border-slate-700 pl-3">
+                            <p class="font-bold text-white mb-2">光譜參數：</p>
+                            <ul class="list-disc list-inside text-slate-400 text-xs space-y-2">
+                                <li>R (紅): <span class="text-fuchsia-400">椰林大道兩側各96顆椰子樹，共幾棵？</span></li>
+                                <li>G (綠): <span class="text-fuchsia-400">第二個完全數 (Perfect Number)</span></li>
+                                <li>B (藍): <span class="text-fuchsia-400">氧原子 (O) 的原子序平方</span></li>
+                            </ul>
+                        </div>
                         <div id="color-preview" class="w-full h-16 rounded mb-4 border border-slate-600 transition-colors duration-300" style="background-color:rgb(0,0,0)"></div>
                         <div class="space-y-4">
-                            <div><div class="flex justify-between mb-1"><label class="text-xs font-bold text-red-400">RED</label><span id="val-r" class="text-xs mono font-bold text-red-400">0</span></div><input type="range" id="range-r" min="0" max="255" value="0" class="w-full accent-red-500 h-2 bg-slate-700 rounded-lg appearance-none"></div>
-                            <div><div class="flex justify-between mb-1"><label class="text-xs font-bold text-green-400">GREEN</label><span id="val-g" class="text-xs mono font-bold text-green-400">0</span></div><input type="range" id="range-g" min="0" max="255" value="0" class="w-full accent-green-500 h-2 bg-slate-700 rounded-lg appearance-none"></div>
-                            <div><div class="flex justify-between mb-1"><label class="text-xs font-bold text-blue-400">BLUE</label><span id="val-b" class="text-xs mono font-bold text-blue-400">0</span></div><input type="range" id="range-b" min="0" max="255" value="0" class="w-full accent-blue-500 h-2 bg-slate-700 rounded-lg appearance-none"></div>
+                            <div><div class="flex justify-between mb-1"><label class="text-xs font-bold text-red-400">RED</label><span id="val-r" class="text-xs mono font-bold text-red-400">0</span></div><input type="range" id="range-r" min="0" max="255" value="0" class="w-full accent-red-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"></div>
+                            <div><div class="flex justify-between mb-1"><label class="text-xs font-bold text-green-400">GREEN</label><span id="val-g" class="text-xs mono font-bold text-green-400">0</span></div><input type="range" id="range-g" min="0" max="255" value="0" class="w-full accent-green-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"></div>
+                            <div><div class="flex justify-between mb-1"><label class="text-xs font-bold text-blue-400">BLUE</label><span id="val-b" class="text-xs mono font-bold text-blue-400">0</span></div><input type="range" id="range-b" min="0" max="255" value="0" class="w-full accent-blue-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"></div>
                         </div>
                     </div>
                     <button onclick="app.checkPalm()" class="w-full btn-neon py-3">確認光譜</button>`;
@@ -688,18 +637,17 @@
                 setTimeout(() => {
                     const r = document.getElementById('range-r'), g = document.getElementById('range-g'), b = document.getElementById('range-b');
                     if(!r) return;
-                    const updateColor = () => { 
+                    const update = () => { 
                         const cp = document.getElementById('color-preview');
                         if (cp) cp.style.backgroundColor = `rgb(${r.value}, ${g.value}, ${b.value})`; 
                         document.getElementById('val-r').innerText = r.value; document.getElementById('val-g').innerText = g.value; document.getElementById('val-b').innerText = b.value;
                     };
-                    [r, g, b].forEach(el => el.addEventListener('input', updateColor));
+                    [r, g, b].forEach(el => el.addEventListener('input', update));
                 }, 100);
             },
             checkPalm() {
                 const r = document.getElementById('range-r').value, g = document.getElementById('range-g').value, b = document.getElementById('range-b').value;
-                if (r == 192 && g == 28 && b == 64) this.completeStage('palm');
-                else this.toast('光譜頻率錯誤');
+                if (r == 192 && g == 28 && b == 64) this.completeStage('palm'); else this.toast('光譜頻率錯誤');
             },
 
             getGatePuzzle() {
@@ -713,6 +661,15 @@
                 });
                 return `
                     <div class="select-none">
+                        <div class="text-xs text-slate-400 space-y-1 mb-6 p-3 bg-ntu-bg rounded border border-ntu-border font-mono leading-relaxed">
+                            <div><span class="text-fuchsia-400">A.</span> 改為國立臺灣大學</div>
+                            <div><span class="text-fuchsia-400">B.</span> 校友獲得諾貝爾獎</div>
+                            <div><span class="text-fuchsia-400">C.</span> 這一年學生數為59人</div>
+                            <div><span class="text-fuchsia-400">D.</span> 舉辦首屆杜鵑花節</div>
+                            <div><span class="text-fuchsia-400">E.</span> 公布設立醫學部</div>
+                            <div><span class="text-fuchsia-400">F.</span> 成立國立臺灣大學聯盟</div>
+                            <div><span class="text-fuchsia-400">G.</span> 公布校歌</div>
+                        </div>
                         <div class="dial-container mb-6" id="dial-container">
                             <div class="dial-track"></div>${dialHtml}
                             <div class="dial-knob" id="gate-knob"><div class="dial-pointer"></div><div class="text-center"><div class="text-5xl font-bold text-white font-mono mt-1" id="gate-seq-num">1</div></div></div>
@@ -737,28 +694,25 @@
                     this.gateRotation = Math.atan2(cy_t - cy, cx_t - cx) * (180 / Math.PI) + 90;
                     knob.style.transform = `rotate(${this.gateRotation}deg)`;
                 };
-                const end = () => { if (!this.isDragging) return; this.isDragging = false; };
+                const end = () => this.isDragging = false;
                 knob.addEventListener('mousedown', start); knob.addEventListener('touchstart', start);
                 window.addEventListener('mousemove', move); window.addEventListener('touchmove', move, { passive: false });
                 window.addEventListener('mouseup', end); window.addEventListener('touchend', end);
             },
             resetGateLock() {
                 this.state.gateLockIndex = 0; this.state.gateLockSequence = []; this.gateRotation = 0;
-                const kn = document.getElementById('gate-knob');
-                if(kn) kn.style.transform = `rotate(0deg)`;
+                const kn = document.getElementById('gate-knob'); if(kn) kn.style.transform = `rotate(0deg)`;
                 this.updateGateUI();
             },
             confirmGateSelection() {
                 const letters = ['A','B','C','D','E','F','G']; 
                 let deg = this.gateRotation % 360; if (deg < 0) deg += 360;
-                let index = Math.round(deg / (360/7)) % 7;
-                this.state.gateLockSequence.push(letters[index]);
+                let idx = Math.round(deg / (360/7)) % 7;
+                this.state.gateLockSequence.push(letters[idx]);
                 this.state.gateLockIndex++;
                 if (this.state.gateLockIndex < 7) this.updateGateUI();
-                else {
-                    if (this.state.gateLockSequence.join('') === 'CEAGBDF') this.completeStage('gate');
-                    else { this.toast('排序錯誤，系統重置'); this.resetGateLock(); }
-                }
+                else if (this.state.gateLockSequence.join('') === 'CEAGBDF') this.completeStage('gate');
+                else { this.toast('排序錯誤，系統重置'); this.resetGateLock(); }
             },
             updateGateUI() {
                 const seq = document.getElementById('gate-seq-num'), prog = document.getElementById('gate-progress');
@@ -773,7 +727,15 @@
             },
 
             getWafflePuzzle() {
-                return `<div class="space-y-4 mb-6">${['E,G,G','B,E,E,F','C,A,B,B,A,G,E'].map((n, i) => `<div class="bg-ntu-bg border border-ntu-border p-4 rounded flex items-center gap-3"><button onclick="app.playMelody(['${n.split(',').join("','")}'])" class="bg-purple-600 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-play text-xs text-white"></i></button><input type="text" id="waffle-q${i+1}" class="term-input flex-1 p-1 text-center uppercase" placeholder="TYPE HERE"></div>`).join('')}</div><button onclick="app.checkWaffle()" class="w-full btn-neon py-3">提交驗證</button>`;
+                return `
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-ntu-bg border border-ntu-border mb-3 shadow-lg"><i class="fa-solid fa-music text-2xl text-purple-400"></i></div>
+                        <p class="text-sm text-slate-300">聆聽旋律拼出英文單字（基準音 C=Do）。</p>
+                    </div>
+                    <div class="space-y-4 mb-6">
+                        ${['E,G,G','B,E,E,F','C,A,B,B,A,G,E'].map((n, i) => `<div class="bg-ntu-bg border border-ntu-border p-4 rounded flex items-center gap-3"><button onclick="app.playMelody(['${n.split(',').join("','")}'])" class="bg-purple-600 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-play text-xs text-white"></i></button><input type="text" id="waffle-q${i+1}" class="term-input flex-1 p-1 text-center uppercase" placeholder="TYPE HERE"></div>`).join('')}
+                    </div>
+                    <button onclick="app.checkWaffle()" class="w-full btn-neon py-3">提交驗證</button>`;
             },
             initWaffleEvents() {},
             checkWaffle() {
@@ -783,7 +745,25 @@
             },
 
             getBellPuzzle() {
-                return `<div class="space-y-4"><input type="number" id="bell-q1" placeholder="Q1 音速 v" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"><input type="number" id="bell-q2" placeholder="Q2 假喇叭提早多久播放" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"><input type="number" id="bell-q3" placeholder="Q3 距離遲到還有多少時間" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"></div><button onclick="app.checkBellAns()" class="w-full btn-neon py-3 mt-4">提交驗證</button>`;
+                return `
+                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4">
+                        <div class="text-left text-sm text-slate-300 mb-6 space-y-2 h-40 overflow-y-auto pr-2 custom-scrollbar border-l-2 border-slate-700 pl-3">
+                            <p class="font-bold text-white mb-2">事件紀錄：</p>
+                            <ul class="list-disc list-inside text-slate-400 text-xs space-y-2 leading-relaxed">
+                                <li>環境氣溫：<span class="text-fuchsia-400">15°C</span></li>
+                                <li>傅鐘：間隔 <span class="text-fuchsia-400">3秒</span>，共 <span class="text-fuchsia-400">21下</span></li>
+                                <li>位置：距真傅鐘 <span class="text-fuchsia-400">1700m</span></li>
+                                <li>干擾：假喇叭在中間，距奎哥近 <span class="text-fuchsia-400">200m</span> (1500m)</li>
+                                <li>觀測：假鐘第一聲比真鐘早 <span class="text-fuchsia-400">12秒</span></li>
+                            </ul>
+                        </div>
+                        <div class="space-y-4">
+                            <input type="number" id="bell-q1" placeholder="Q1 音速 v (m/s)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
+                            <input type="number" id="bell-q2" placeholder="Q2 假喇叭提早 (s)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
+                            <input type="number" id="bell-q3" placeholder="Q3 真正遲到倒數 (s)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
+                        </div>
+                    </div>
+                    <button onclick="app.checkBellAns()" class="w-full btn-neon py-3">提交驗證</button>`;
             },
             checkBellAns() {
                 let c = 0;
@@ -794,7 +774,22 @@
             },
 
             getLibraryPuzzle() {
-                return `<div class="space-y-4"><input type="number" id="lib-q1" placeholder="Q1 AB距離多遠" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"><input type="number" id="lib-q2" placeholder="Q2 奎哥站在多高的位置" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white"></div><button onclick="app.checkLibraryAns()" class="w-full btn-neon py-3 mt-4">提交驗證</button>`;
+                return `
+                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4">
+                        <div class="text-left text-sm text-slate-300 mb-6 space-y-2 border-l-2 border-slate-700 pl-3">
+                            <p class="font-bold text-white mb-2">觀測數據：</p>
+                            <ul class="list-disc list-inside text-slate-400 text-xs space-y-2">
+                                <li>觀測點：總圖書館樓頂</li>
+                                <li>目標A (正西)：圖資系館 <span class="text-fuchsia-400">俯角 10°</span></li>
+                                <li>目標B (正南)：森林系館 <span class="text-fuchsia-400">俯角 8°</span></li>
+                            </ul>
+                        </div>
+                        <div class="space-y-4">
+                            <input type="number" id="lib-q1" placeholder="Q1 AB距離 (m)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
+                            <input type="number" id="lib-q2" placeholder="Q2 樓高 (m)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
+                        </div>
+                    </div>
+                    <button onclick="app.checkLibraryAns()" class="w-full btn-neon py-3">提交驗證</button>`;
             },
             initLibraryEvents() {},
             checkLibraryAns() {
@@ -806,30 +801,47 @@
 
             getSubwayPuzzle() {
                 const opt = ['台北車站', '新店', '秀朗橋', '南勢角', '雙連', '忠孝復興', '龍山寺', '中和', '行天宮', '小碧潭'];
-                return `<div class="grid grid-cols-2 gap-3 mb-4">${opt.map(o => `<label class="bg-ntu-card p-3 rounded border border-ntu-border flex items-center gap-2 select-none"><input type="checkbox" name="subway-opt" value="${o}"> <span class="text-sm text-slate-300">${o}</span></label>`).join('')}</div><button onclick="app.checkSubwayAns()" class="w-full btn-neon py-3">提交驗證</button>`;
+                return `
+                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded mb-4">
+                        <p class="text-sm text-slate-300 mb-4 leading-relaxed"><span class="text-fuchsia-400 font-bold">租屋條件：</span><br>1. 離公館 6 站內<br>2. 最多換線 1 次</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            ${opt.map(o => `<label class="bg-ntu-card p-3 rounded border border-ntu-border flex items-center gap-2 select-none"><input type="checkbox" name="subway-opt" value="${o}"> <span class="text-sm text-slate-300">${o}</span></label>`).join('')}
+                        </div>
+                    </div>
+                    <button onclick="app.checkSubwayAns()" class="w-full btn-neon py-3">提交驗證</button>`;
             },
             checkSubwayAns() {
                 const cor = ['台北車站', '新店', '秀朗橋', '南勢角', '龍山寺', '行天宮', '小碧潭'];
                 const chk = Array.from(document.querySelectorAll('input[name="subway-opt"]:checked')).map(el => el.value);
-                if (cor.length === chk.length && cor.every(v => chk.includes(v))) this.completeStage('subway');
-                else this.toast('選擇錯誤');
+                if (cor.length === chk.length && cor.every(v => chk.includes(v))) this.completeStage('subway'); else this.toast('選擇錯誤');
             },
 
             getLakePuzzle() {
-                return `<input type="text" id="ans-lake" placeholder="輸入五字詩句" class="term-input w-full p-2 text-center text-lg mb-4"><button onclick="app.checkAnswerText('lake', 'ans-lake', ['對影成三人'])" class="w-full btn-neon py-3">提交驗證</button>`;
+                return `
+                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4">
+                        <div class="text-left text-sm text-slate-300 mb-6 space-y-2 border-l-2 border-slate-700 pl-3">
+                            <p class="font-bold text-fuchsia-400">光學實驗報告：</p>
+                            <p class="text-xs text-slate-400">當光源(明月)照射物體(李白)，系統中出現了「三個實體」（觀測者、光源、投影成像）。請輸入描述此物理現象結果的詩句（五個字）。</p>
+                        </div>
+                        <input type="text" id="ans-lake" placeholder="輸入五字詩句" class="term-input w-full p-2 text-center text-lg mb-4">
+                    </div>
+                    <button onclick="app.checkAnswerText('lake', 'ans-lake', ['對影成三人'])" class="w-full btn-neon py-3">提交驗證</button>`;
             },
             getGymPuzzle() {
-                return `<input type="text" id="ans-gym" placeholder="輸入數值" class="term-input w-full p-2 text-center text-lg mb-4"><button onclick="app.checkAnswer('gym', 'ans-gym', '-1')" class="w-full btn-neon py-3">提交驗證</button>`;
+                return `
+                    <div class="bg-ntu-bg border border-ntu-border p-4 rounded text-center mb-4">
+                        <p class="text-sm text-slate-300 mb-4 text-left font-mono">f(x) = x³ - 3x + 1<br>計算此函數在 x > 0 區域內的局部極小值。</p>
+                        <input type="text" id="ans-gym" placeholder="輸入數值" class="term-input w-full p-2 text-center text-lg mb-4">
+                    </div>
+                    <button onclick="app.checkAnswer('gym', 'ans-gym', '-1')" class="w-full btn-neon py-3">提交驗證</button>`;
             },
 
             checkAnswer(id, inp, ans) {
-                const val = document.getElementById(inp).value.trim();
-                if (val === ans) this.completeStage(id);
+                if (document.getElementById(inp).value.trim() === ans) this.completeStage(id);
                 else { this.toast('答案錯誤'); this.highlightError(inp); }
             },
             checkAnswerText(id, inp, anss) {
-                const val = document.getElementById(inp).value.trim();
-                if (anss.includes(val)) this.completeStage(id);
+                if (anss.includes(document.getElementById(inp).value.trim())) this.completeStage(id);
                 else { this.toast('答案錯誤'); this.highlightError(inp); }
             },
             highlightError(id) {
@@ -842,16 +854,13 @@
                     this.state.completedStages.push(id);
                     this.saveProgress();
                     const c = STAGES[id].code;
-                    const cont = document.getElementById('app-container');
-                    if (cont) {
-                        cont.innerHTML = `
-                            <div class="h-full flex flex-col items-center justify-center fade-in text-center">
-                                <div class="w-24 h-24 rounded-full bg-ntu-card border border-fuchsia-500 flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(217,70,239,0.5)]"><i class="fa-solid fa-unlock text-4xl text-white"></i></div>
-                                <h2 class="text-3xl font-bold text-white mb-4">解鎖成功</h2>
-                                <div class="bg-ntu-bg border border-ntu-border rounded p-4 mb-8"><div class="text-xs text-slate-500 mb-1">獲得金鑰碎片</div><div class="text-4xl font-mono font-bold text-white">${c}</div></div>
-                                <button onclick="app.navigate('mission')" class="px-8 py-3 bg-slate-700 rounded text-white font-bold hover:bg-slate-600 transition">前往下一站</button>
-                            </div>`;
-                    }
+                    document.getElementById('app-container').innerHTML = `
+                        <div class="h-full flex flex-col items-center justify-center fade-in text-center">
+                            <div class="w-24 h-24 rounded-full bg-ntu-card border border-fuchsia-500 flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(217,70,239,0.5)]"><i class="fa-solid fa-unlock text-4xl text-white"></i></div>
+                            <h2 class="text-3xl font-bold text-white mb-4">解鎖成功</h2>
+                            <div class="bg-ntu-bg border border-ntu-border rounded p-4 mb-8"><div class="text-xs text-slate-500 mb-1">獲得金鑰碎片</div><div class="text-4xl font-mono font-bold text-white">${c}</div></div>
+                            <button onclick="app.navigate('mission')" class="px-8 py-3 bg-slate-700 rounded text-white font-bold hover:bg-slate-600 transition">前往下一站</button>
+                        </div>`;
                 } else this.render();
             },
 
@@ -866,8 +875,7 @@
             },
 
             renderFinal(container) {
-                const route = TEAM_ROUTES[this.state.teamId];
-                const ok = this.state.completedStages.length === route.length;
+                const ok = this.state.completedStages.length === TEAM_ROUTES[this.state.teamId].length;
                 container.innerHTML = `
                     <div class="ntu-card p-8 text-center">
                         <i class="fa-solid fa-shield-halved text-6xl mb-6 ${ok?'text-red-500 animate-pulse':'text-slate-700'}"></i>
@@ -891,7 +899,7 @@
                                 <div class="bg-emerald-500/10 border-2 border-emerald-500 p-8 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                                     <div class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fa-solid fa-check text-3xl text-ntu-bg"></i></div>
                                     <h2 class="text-3xl font-bold text-white mb-4 tracking-tighter">ACCESS GRANTED</h2>
-                                    <p class="text-slate-300 leading-relaxed">恭喜你任務圓滿完成！<br>歡迎截圖此畫面回傳工作人員，也祝你如願考取理想校系。</p>
+                                    <p class="text-slate-300 leading-relaxed">任務圓滿完成！<br>請截圖此畫面回傳工作人員領取獎勵。</p>
                                     <div class="mt-8 pt-6 border-t border-emerald-500/30 text-[10px] text-emerald-500 font-mono">HASH: ${Date.now().toString(16).toUpperCase()}</div>
                                 </div>
                             </div>`;
