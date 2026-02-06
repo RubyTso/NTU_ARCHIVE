@@ -319,26 +319,47 @@
 
             init() { this.loadProgress(); this.render(); },
 
-            initAudio() {
-                if(!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if(this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            async initAudio() {
+                try {
+                     // 兼容 iOS/Safari 的 AudioContext
+                    if (!this.audioCtx) {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    // 如果引擎處於「暫停」狀態（iOS 常態），則手動恢復
+                    if (this.audioCtx.state === 'suspended') {
+                    await this.audioCtx.resume();
+                    }
+                    return true;
+                } catch (e) {
+                    console.error("Audio Context 初始化失敗", e);
+                    return false;
+                }
             },
 
-            playMelody(notes) {
-                this.initAudio();
+            async playMelody(notes) {
+                 // 每次播放前先調用 initAudio 確保引擎已就緒
+                  const ready = await this.initAudio();
+                  if (!ready) return;
+
                 const now = this.audioCtx.currentTime;
-                notes.forEach((n, i) => {
+                 notes.forEach((n, i) => {
                     if(!this.noteFreqs[n]) return;
+        
                     const osc = this.audioCtx.createOscillator();
                     const gain = this.audioCtx.createGain();
-                    const t = now + i * 0.6;
-                    osc.type = 'triangle';
+                    const t = now + i * 0.6; // 設定音符間隔
+        
+                    osc.type = 'triangle'; // 採用三角波，音色較柔和
                     osc.frequency.value = this.noteFreqs[n];
+        
                     osc.connect(gain);
                     gain.connect(this.audioCtx.destination);
+        
+                    // 淡入淡出效果，避免爆音
                     gain.gain.setValueAtTime(0, t);
                     gain.gain.linearRampToValueAtTime(0.3, t + 0.05);
                     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+            
                     osc.start(t);
                     osc.stop(t + 0.5);
                 });
