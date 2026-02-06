@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Project: NTU_LEGACY | 台大實境解謎</title>
+    <title>Project: NTU_ARCHIVE | 台大校園實境解謎</title>
     <!-- 設定網頁 Favicon (瀏覽器分頁圖示) -->
     <link rel="icon" type="image/png" href="images/logo.png">
     
@@ -207,7 +207,7 @@
                 lat: 25.017400, lon: 121.533900, 
                 rescueCode: 'NTU1928',
                 hintTitle: '知識的入口',
-                hintDesc: '所有旅程的起點，昔日的帝國大學門戶。',
+                hintDesc: '大學生涯旅程的起點，昔日帝國大學的重要門戶。',
                 hintImage: 'images/gate.jpg', 
                 icon: 'fa-torii-gate', title: '時光刻度',
                 desc: '請轉動圓盤，依發生年代將校史事件排序。',
@@ -229,10 +229,10 @@
                 lat: 25.018000, lon: 121.538500, 
                 rescueCode: 'RING21',
                 hintTitle: '時間的警鐘',
-                hintDesc: '為了紀念一位偉大的校長，這裡的鐘聲總是敲響21下。',
+                hintDesc: '為了紀念一位偉大的校長，這裡的鐘聲總是依照他的名言敲響。',
                 hintImage: 'images/bell.jpg', 
                 icon: 'fa-bell', title: '聲速奧秘',
-                desc: '分辨真假傅鐘的聲響，計算音速與時間差。',
+                desc: '奎哥期末考第一節課快遲到，學校規定：只有當傅鐘「最後一下敲完」那一刻才算遲到。他在路口時聽到鐘聲，卻發現有人惡作劇放了「假傅鐘」喇叭，播放幾乎一樣的鐘聲來混淆同學。請協助他分辨真假傅鐘的聲響，計算音速與時間差。',
                 difficultyLabel: '物理數學', type: 'physics'
             },
             'gym': {
@@ -265,7 +265,7 @@
                 hintDesc: '校園的幾何中心，保存著百萬藏書的宏偉建築。',
                 hintImage: 'images/library.jpg', 
                 icon: 'fa-book', title: '三角測量',
-                desc: '利用俯角觀測數據，計算建築物的距離與高度。',
+                desc: '奎哥從台大總圖書館樓頂觀測校園，請利用俯角觀測數據，計算建築物的距離與高度。',
                 difficultyLabel: '數學幾何', type: 'math'
             },
             'waffle': {
@@ -287,7 +287,7 @@
                 hintDesc: '校園旁的交通樞紐，四通八達的捷運路網。',
                 hintImage: 'images/subway.jpg', 
                 icon: 'fa-train-subway', title: '捷運租屋',
-                desc: '奎哥想在學校附近租屋。請協助他篩選符合通勤條件的捷運站。',
+                desc: '奎哥就讀台灣大學，他希望租房租在離學校6站捷運以內、最多只需要換線一次的地方，他有哪些捷運站附近可以選擇？。請協助他篩選符合通勤條件的捷運站。',
                 difficultyLabel: '生活地理', type: 'checkbox'
             }
         };
@@ -753,14 +753,14 @@
                                 <li>環境氣溫：<span class="text-fuchsia-400">15°C</span></li>
                                 <li>傅鐘：間隔 <span class="text-fuchsia-400">3秒</span>，共 <span class="text-fuchsia-400">21下</span></li>
                                 <li>位置：距真傅鐘 <span class="text-fuchsia-400">1700m</span></li>
-                                <li>干擾：假喇叭在中間，距奎哥近 <span class="text-fuchsia-400">200m</span> (1500m)</li>
+                                <li>干擾：假喇叭在中間，距奎哥近 <span class="text-fuchsia-400">200m</span></li>
                                 <li>觀測：假鐘第一聲比真鐘早 <span class="text-fuchsia-400">12秒</span></li>
                             </ul>
                         </div>
                         <div class="space-y-4">
                             <input type="number" id="bell-q1" placeholder="Q1 音速 v (m/s)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
                             <input type="number" id="bell-q2" placeholder="Q2 假喇叭提早 (s)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
-                            <input type="number" id="bell-q3" placeholder="Q3 真正遲到倒數 (s)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
+                            <input type="number" id="bell-q3" placeholder="Q3 真正距離遲到還有 (s)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
                         </div>
                     </div>
                     <button onclick="app.checkBellAns()" class="w-full btn-neon py-3">提交驗證</button>`;
@@ -785,8 +785,8 @@
                             </ul>
                         </div>
                         <div class="space-y-4">
-                            <input type="number" id="lib-q1" placeholder="Q1 AB距離 (m)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
-                            <input type="number" id="lib-q2" placeholder="Q2 樓高 (m)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
+                            <input type="number" id="lib-q1" placeholder="Q1 AB系館距離 (m)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
+                            <input type="number" id="lib-q2" placeholder="Q2 總圖書館樓高 (m)" class="w-full bg-transparent border border-ntu-border p-3 rounded text-white">
                         </div>
                     </div>
                     <button onclick="app.checkLibraryAns()" class="w-full btn-neon py-3">提交驗證</button>`;
@@ -899,7 +899,7 @@
                                 <div class="bg-emerald-500/10 border-2 border-emerald-500 p-8 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                                     <div class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fa-solid fa-check text-3xl text-ntu-bg"></i></div>
                                     <h2 class="text-3xl font-bold text-white mb-4 tracking-tighter">ACCESS GRANTED</h2>
-                                    <p class="text-slate-300 leading-relaxed">任務圓滿完成！<br>請截圖此畫面回傳工作人員領取獎勵。</p>
+                                    <p class="text-slate-300 leading-relaxed">恭喜你，任務圓滿完成！<br>請截圖此畫面回傳群組，第一名完成的小隊將可以領取獎勵。</p>
                                     <div class="mt-8 pt-6 border-t border-emerald-500/30 text-[10px] text-emerald-500 font-mono">HASH: ${Date.now().toString(16).toUpperCase()}</div>
                                 </div>
                             </div>`;
